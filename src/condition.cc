@@ -58,14 +58,22 @@ NAN_METHOD(Condition::eq) {
     if (info.Length() == 1 && info[0]->IsString())
     {
         std::string value = *Nan::Utf8String(info[0]->ToString());
-        cond->base = cond->base.eq(value);
-        info.GetReturnValue().SetUndefined();
+        try {
+            cond->base = cond->base.eq(value);
+            info.GetReturnValue().SetUndefined();    
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        }
     } 
     else if (info.Length() == 1 && info[0]->IsNumber())
     {
         double value = info[0]->NumberValue();
-        cond->base = cond->base.eq(value);
-        info.GetReturnValue().SetUndefined();
+        try {
+            cond->base = cond->base.eq(value);
+            info.GetReturnValue().SetUndefined();    
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        }
     }
     else
     {
@@ -78,14 +86,22 @@ NAN_METHOD(Condition::gt) {
     if (info.Length() == 1 && info[0]->IsString())
     {
         std::string value = *Nan::Utf8String(info[0]->ToString());
-        cond->base = cond->base.gt(value);
-        info.GetReturnValue().SetUndefined();
+        try {
+            cond->base = cond->base.gt(value);
+            info.GetReturnValue().SetUndefined();    
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        }
     } 
     else if (info.Length() == 1 && info[0]->IsNumber())
     {
         double value = info[0]->NumberValue();
-        cond->base = cond->base.gt(value);
-        info.GetReturnValue().SetUndefined();
+        try {
+            cond->base = cond->base.gt(value);
+            info.GetReturnValue().SetUndefined();    
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        }
     }
     else
     {
@@ -98,14 +114,22 @@ NAN_METHOD(Condition::lt) {
     if (info.Length() == 1 && info[0]->IsString())
     {
         std::string value = *Nan::Utf8String(info[0]->ToString());
-        cond->base = cond->base.lt(value);
-        info.GetReturnValue().SetUndefined();
+        try {
+            cond->base = cond->base.lt(value);
+            info.GetReturnValue().SetUndefined();    
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        }  
     } 
     else if (info.Length() == 1 && info[0]->IsNumber())
     {
         double value = info[0]->NumberValue();
-        cond->base = cond->base.lt(value);
-        info.GetReturnValue().SetUndefined();
+        try {
+            cond->base = cond->base.lt(value);
+            info.GetReturnValue().SetUndefined();    
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        } 
     }
     else
     {
@@ -118,14 +142,22 @@ NAN_METHOD(Condition::ge) {
     if (info.Length() == 1 && info[0]->IsString())
     {
         std::string value = *Nan::Utf8String(info[0]->ToString());
-        cond->base = cond->base.ge(value);
-        info.GetReturnValue().SetUndefined();
+        try {
+            cond->base = cond->base.ge(value);
+            info.GetReturnValue().SetUndefined();    
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        }
     } 
     else if (info.Length() == 1 && info[0]->IsNumber())
     {
         double value = info[0]->NumberValue();
-        cond->base = cond->base.ge(value);
-        info.GetReturnValue().SetUndefined();
+        try {
+            cond->base = cond->base.ge(value);
+            info.GetReturnValue().SetUndefined();    
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        }
     }
     else
     {
@@ -138,14 +170,22 @@ NAN_METHOD(Condition::le) {
     if (info.Length() == 1 && info[0]->IsString())
     {
         std::string value = *Nan::Utf8String(info[0]->ToString());
-        cond->base = cond->base.le(value);
-        info.GetReturnValue().SetUndefined();
+        try {
+            cond->base = cond->base.le(value);
+            info.GetReturnValue().SetUndefined();    
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        }
     } 
     else if (info.Length() == 1 && info[0]->IsNumber())
     {
         double value = info[0]->NumberValue();
-        cond->base = cond->base.le(value);
-        info.GetReturnValue().SetUndefined();
+        try {
+            cond->base = cond->base.le(value);
+            info.GetReturnValue().SetUndefined();    
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        }
     }
     else
     {
@@ -158,14 +198,22 @@ NAN_METHOD(Condition::contain) {
     if (info.Length() == 1 && info[0]->IsString())
     {
         std::string value = *Nan::Utf8String(info[0]->ToString());
-        cond->base = cond->base.contain(value);
-        info.GetReturnValue().SetUndefined();
+        try {
+            cond->base = cond->base.contain(value);
+            info.GetReturnValue().SetUndefined();    
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        }
     } 
     else if (info.Length() == 1 && info[0]->IsNumber())
     {
         double value = info[0]->NumberValue();
-        cond->base = cond->base.contain(value);
-        info.GetReturnValue().SetUndefined();
+        try {
+            cond->base = cond->base.contain(value);
+            info.GetReturnValue().SetUndefined();    
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        } 
     }
     else
     {
@@ -178,14 +226,22 @@ NAN_METHOD(Condition::beginWith) {
     if (info.Length() == 1 && info[0]->IsString())
     {
         std::string value = *Nan::Utf8String(info[0]->ToString());
-        cond->base = cond->base.beginWith(value);
-        info.GetReturnValue().SetUndefined();
+        try {
+            cond->base = cond->base.beginWith(value);
+            info.GetReturnValue().SetUndefined();    
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        }
     } 
     else if (info.Length() == 1 && info[0]->IsNumber())
     {
         double value = info[0]->NumberValue();
-        cond->base = cond->base.beginWith(value);
-        info.GetReturnValue().SetUndefined();
+        try {
+            cond->base = cond->base.beginWith(value);
+            info.GetReturnValue().SetUndefined();    
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        }
     }
     else
     {
@@ -198,14 +254,22 @@ NAN_METHOD(Condition::endWith) {
     if (info.Length() == 1 && info[0]->IsString())
     {
         std::string value = *Nan::Utf8String(info[0]->ToString());
-        cond->base = cond->base.endWith(value);
-        info.GetReturnValue().SetUndefined();
+        try {
+            cond->base = cond->base.endWith(value);
+            info.GetReturnValue().SetUndefined();    
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        }
     } 
     else if (info.Length() == 1 && info[0]->IsNumber())
     {
         double value = info[0]->NumberValue();
-        cond->base = cond->base.endWith(value);
-        info.GetReturnValue().SetUndefined();
+        try {
+            cond->base = cond->base.endWith(value);
+            info.GetReturnValue().SetUndefined();    
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        }
     }
     else
     {
@@ -218,14 +282,22 @@ NAN_METHOD(Condition::like) {
     if (info.Length() == 1 && info[0]->IsString())
     {
         std::string value = *Nan::Utf8String(info[0]->ToString());
-        cond->base = cond->base.like(value);
-        info.GetReturnValue().SetUndefined();
+        try {
+            cond->base = cond->base.like(value);
+            info.GetReturnValue().SetUndefined();    
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        }     
     } 
     else if (info.Length() == 1 && info[0]->IsNumber())
     {
         double value = info[0]->NumberValue();
-        cond->base = cond->base.like(value);
-        info.GetReturnValue().SetUndefined();
+        try {
+            cond->base = cond->base.like(value);
+            info.GetReturnValue().SetUndefined();    
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        } 
     }
     else
     {
@@ -238,14 +310,22 @@ NAN_METHOD(Condition::regex) {
     if (info.Length() == 1 && info[0]->IsString())
     {
         std::string value = *Nan::Utf8String(info[0]->ToString());
-        cond->base = cond->base.regex(value);
-        info.GetReturnValue().SetUndefined();
+        try {
+            cond->base = cond->base.regex(value);
+            info.GetReturnValue().SetUndefined();    
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        } 
     } 
     else if (info.Length() == 1 && info[0]->IsNumber())
     {
         double value = info[0]->NumberValue();
-        cond->base = cond->base.regex(value);
-        info.GetReturnValue().SetUndefined();
+        try {
+            cond->base = cond->base.regex(value);
+            info.GetReturnValue().SetUndefined();    
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        }
     }
     else
     {
@@ -255,14 +335,22 @@ NAN_METHOD(Condition::regex) {
 
 NAN_METHOD(Condition::ignoreCase) {
     Condition *cond = Nan::ObjectWrap::Unwrap<Condition>(info.This());
-    cond->base = cond->base.ignoreCase();
-    info.GetReturnValue().SetUndefined();
+    try {
+        cond->base = cond->base.ignoreCase();
+        info.GetReturnValue().SetUndefined();        
+    } catch ( nogdb::Error& err ) {
+        Nan::ThrowError(err.what());
+    }
 }
 
 NAN_METHOD(Condition::null) {
     Condition *cond = Nan::ObjectWrap::Unwrap<Condition>(info.This());
-    cond->base = cond->base.null();
-    info.GetReturnValue().SetUndefined();
+    try {
+        cond->base = cond->base.null();
+        info.GetReturnValue().SetUndefined();        
+    } catch ( nogdb::Error& err ) {
+        Nan::ThrowError(err.what());
+    }
 }
 
 v8::Local<v8::Object> Condition::NewInstance(v8::Local<v8::Value> propName) {

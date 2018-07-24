@@ -44,23 +44,35 @@ NAN_METHOD(Context::New)
 
 NAN_METHOD(Context::getMaxVersionId) {
     Context *ctx = Nan::ObjectWrap::Unwrap<Context>(info.This());
-    int maxVerId =  ctx->base.getMaxVersionId();
-    info.GetReturnValue().Set(maxVerId);
+    try {
+        int maxVerId =  ctx->base.getMaxVersionId();
+        info.GetReturnValue().Set(maxVerId);    
+    } catch ( nogdb::Error& err ) {
+        Nan::ThrowError(err.what());
+    }
 }
 
 NAN_METHOD(Context::getMaxTxnId) {
     Context *ctx = Nan::ObjectWrap::Unwrap<Context>(info.This());
-    int maxTxnId =  ctx->base.getMaxTxnId();
-    info.GetReturnValue().Set(maxTxnId);
+    try {
+        int maxTxnId =  ctx->base.getMaxTxnId();
+        info.GetReturnValue().Set(maxTxnId);    
+    } catch ( nogdb::Error& err ) {
+        Nan::ThrowError(err.what());
+    }
 }
 
 NAN_METHOD(Context::getMinActiveTxnId) {
     Context *ctx = Nan::ObjectWrap::Unwrap<Context>(info.This());
-    std::pair<int, int> minActiveTxnId = ctx->base.getMinActiveTxnId();
-    v8::Local<v8::Object> retval = Nan::New<v8::Object>();
-    Nan::Set(retval, Nan::New<v8::String>("first").ToLocalChecked(), Nan::New<v8::Number>(minActiveTxnId.first));
-    Nan::Set(retval, Nan::New<v8::String>("second").ToLocalChecked(), Nan::New<v8::Number>(minActiveTxnId.second));
-    info.GetReturnValue().Set(retval);
+    try {
+        std::pair<int, int> minActiveTxnId = ctx->base.getMinActiveTxnId();
+        v8::Local<v8::Object> retval = Nan::New<v8::Object>();
+        Nan::Set(retval, Nan::New<v8::String>("first").ToLocalChecked(), Nan::New<v8::Number>(minActiveTxnId.first));
+        Nan::Set(retval, Nan::New<v8::String>("second").ToLocalChecked(), Nan::New<v8::Number>(minActiveTxnId.second));
+        info.GetReturnValue().Set(retval);    
+    } catch ( nogdb::Error& err ) {
+        Nan::ThrowError(err.what());
+    }
 }
 
 v8::Local<v8::Object> Context::NewInstance(v8::Local<v8::Value> dbPath) {

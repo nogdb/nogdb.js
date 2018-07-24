@@ -58,7 +58,11 @@ NAN_METHOD(ClassFilter::add) {
     if (info.Length() == 1 && info[0]->IsString())
     {
         ClassFilter *classF = Nan::ObjectWrap::Unwrap<ClassFilter>(info.This());
-        classF->base.add(*Nan::Utf8String(info[0]->ToString()));
+        try {
+            classF->base.add(*Nan::Utf8String(info[0]->ToString()));
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        }
     }
     else
     {
@@ -70,7 +74,11 @@ NAN_METHOD(ClassFilter::remove) {
     if (info.Length() == 1 && info[0]->IsString())
     {
         ClassFilter *classF = Nan::ObjectWrap::Unwrap<ClassFilter>(info.This());
-        classF->base.remove(*Nan::Utf8String(info[0]->ToString()));
+        try {
+            classF->base.remove(*Nan::Utf8String(info[0]->ToString()));
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        }
     }
     else
     {
@@ -81,25 +89,38 @@ NAN_METHOD(ClassFilter::remove) {
 NAN_METHOD(ClassFilter::size)
 {
     ClassFilter *classF = Nan::ObjectWrap::Unwrap<ClassFilter>(info.This());
-    info.GetReturnValue().Set(Nan::New<v8::Number>(classF->base.size()));
+    try {
+        info.GetReturnValue().Set(Nan::New<v8::Number>(classF->base.size()));  
+    } catch ( nogdb::Error& err ) {
+        Nan::ThrowError(err.what());
+    }
 }
 
 NAN_METHOD(ClassFilter::empty)
 {
     ClassFilter *classF = Nan::ObjectWrap::Unwrap<ClassFilter>(info.This());
-    info.GetReturnValue().Set(Nan::New<v8::Boolean>(classF->base.empty()));
+    try {
+        info.GetReturnValue().Set(Nan::New<v8::Boolean>(classF->base.empty()));    
+    } catch ( nogdb::Error& err ) {
+        Nan::ThrowError(err.what());
+    }
 }
 NAN_METHOD(ClassFilter::getClassName)
 {
     ClassFilter *classF = Nan::ObjectWrap::Unwrap<ClassFilter>(info.This());
-    std::set<std::string> classNames = classF->base.getClassName();
-    v8::Local<v8::Array> retval = Nan::New<v8::Array>(classNames.size());
-    int i = 0;
-    for(std::string className: classNames){
-        Nan::Set(retval, i, Nan::New<v8::String>(className).ToLocalChecked());
-        i++;
+    try {
+        std::set<std::string> classNames = classF->base.getClassName();
+        v8::Local<v8::Array> retval = Nan::New<v8::Array>(classNames.size());
+        int i = 0;
+        for(std::string className: classNames){
+            Nan::Set(retval, i, Nan::New<v8::String>(className).ToLocalChecked());
+            i++;
+        }
+        info.GetReturnValue().Set(retval);   
+    } catch ( nogdb::Error& err ) {
+        Nan::ThrowError(err.what());
     }
-    info.GetReturnValue().Set(retval);
+    
 }
 
 v8::Local<v8::Object> ClassFilter::NewInstance(v8::Local<v8::Value> classNames) {

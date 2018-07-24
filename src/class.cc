@@ -33,10 +33,12 @@ NAN_METHOD(Class::create)
         if(type=="VERTEX")      classType = nogdb::ClassType::VERTEX;
         else if(type=="EDGE")   classType = nogdb::ClassType::EDGE;
         else Nan::ThrowError("ClassType Invalid");
-        
-        nogdb::ClassDescriptor classD = nogdb::Class::create(*txn->base, className, classType);
-
-        info.GetReturnValue().Set(v8ClassDescriptor(classD));
+        try {
+            nogdb::ClassDescriptor classD = nogdb::Class::create(*txn->base, className, classType);
+            info.GetReturnValue().Set(v8ClassDescriptor(classD));
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        }
     }
     else
     {
@@ -52,10 +54,12 @@ NAN_METHOD(Class::createExtend)
         Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info[0]->ToObject());
         std::string className = *Nan::Utf8String(info[1]->ToString());
         std::string superClass = *Nan::Utf8String(info[2]->ToString());
-
-        nogdb::ClassDescriptor classD = nogdb::Class::createExtend(*txn->base, className, superClass);
-
-        info.GetReturnValue().Set(v8ClassDescriptor(classD));
+        try {
+            nogdb::ClassDescriptor classD = nogdb::Class::createExtend(*txn->base, className, superClass);
+            info.GetReturnValue().Set(v8ClassDescriptor(classD));
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        }
     }
     else
     {
@@ -70,10 +74,12 @@ NAN_METHOD(Class::drop)
     {
         Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info[0]->ToObject());
         std::string className = *Nan::Utf8String(info[1]->ToString());
-
-        nogdb::Class::drop(*txn->base, className);
-
-        info.GetReturnValue().SetUndefined();
+        try {
+            nogdb::Class::drop(*txn->base, className);
+            info.GetReturnValue().SetUndefined();
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        }
     }
     else
     {
@@ -89,10 +95,13 @@ NAN_METHOD(Class::alter)
         Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info[0]->ToObject());
         std::string oldClassName = *Nan::Utf8String(info[1]->ToString());
         std::string newClassName = *Nan::Utf8String(info[2]->ToString());
-
-        nogdb::Class::alter(*txn->base, oldClassName, newClassName);
-
-        info.GetReturnValue().SetUndefined();
+        try {
+            nogdb::Class::alter(*txn->base, oldClassName, newClassName);
+            info.GetReturnValue().SetUndefined();
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        }
+        
     }
     else
     {

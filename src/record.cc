@@ -29,7 +29,6 @@ NAN_METHOD(Record::New)
 {
     Record *record = new Record();
     record->Wrap(info.Holder());
-
     info.GetReturnValue().Set(info.Holder());
 }
 
@@ -40,15 +39,23 @@ NAN_METHOD(Record::set)
     {
         std::string propName = *Nan::Utf8String(info[0]->ToString());
         std::string value = *Nan::Utf8String(info[1]->ToString());
-        record->base = record->base.set(propName,value);
-        info.GetReturnValue().SetUndefined();
+        try {
+            record->base = record->base.set(propName,value);
+            info.GetReturnValue().SetUndefined();
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        }   
     } 
     else if (info.Length() == 2 && info[0]->IsString() && info[1]->IsNumber())
     {
         std::string propName = *Nan::Utf8String(info[0]->ToString());
         double value = info[1]->NumberValue();
-        record->base = record->base.set(propName,value);
-        info.GetReturnValue().SetUndefined();
+        try {
+            record->base = record->base.set(propName,value);
+            info.GetReturnValue().SetUndefined();
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        }    
     }
     else
     {
@@ -59,16 +66,20 @@ NAN_METHOD(Record::set)
 NAN_METHOD(Record::getProperties) 
 {
     Record *record = Nan::ObjectWrap::Unwrap<Record>(info.This());
-    std::vector<std::string> properties =  record->base.getProperties();
-    v8::Local<v8::Array> retval = Nan::New<v8::Array>(record->base.size());
-    int i = 0;
-    for(std::vector<std::string>::iterator it = properties.begin(); it != properties.end(); ++it)
-    {
-        std::string property (*it);
-        Nan::Set(retval, i, Nan::New<v8::String>(property).ToLocalChecked());
-        i++;
-    }
-    info.GetReturnValue().Set(retval);
+    try {
+        std::vector<std::string> properties =  record->base.getProperties();
+        v8::Local<v8::Array> retval = Nan::New<v8::Array>(record->base.size());
+        int i = 0;
+        for(std::vector<std::string>::iterator it = properties.begin(); it != properties.end(); ++it)
+        {
+            std::string property (*it);
+            Nan::Set(retval, i, Nan::New<v8::String>(property).ToLocalChecked());
+            i++;
+        }
+        info.GetReturnValue().Set(retval);        
+    } catch ( nogdb::Error& err ) {
+        Nan::ThrowError(err.what());
+    }  
 }
 
 NAN_METHOD(Record::unset) 
@@ -77,8 +88,12 @@ NAN_METHOD(Record::unset)
     if (info.Length() == 1 && info[0]->IsString())
     {
         std::string propName = *Nan::Utf8String(info[0]->ToString());
-        record->base.unset(propName);
-        info.GetReturnValue().SetUndefined();
+        try {
+            record->base.unset(propName);
+            info.GetReturnValue().SetUndefined();    
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        }
     }
     else
     {
@@ -89,23 +104,34 @@ NAN_METHOD(Record::unset)
 NAN_METHOD(Record::size) 
 {
     Record *record = Nan::ObjectWrap::Unwrap<Record>(info.This());
-    int size =  record->base.size();
-    info.GetReturnValue().Set(size);
+    try {
+        int size =  record->base.size();
+        info.GetReturnValue().Set(size);    
+    } catch ( nogdb::Error& err ) {
+        Nan::ThrowError(err.what());
+    }
 }
 
 NAN_METHOD(Record::empty) 
 {
     Record *record = Nan::ObjectWrap::Unwrap<Record>(info.This());
-    bool empty = record->base.empty();
-    v8::Local<v8::Boolean> retval = Nan::New(empty);
-    info.GetReturnValue().Set(retval);
+    try {
+        v8::Local<v8::Boolean> retval = Nan::New(record->base.empty());
+        info.GetReturnValue().Set(retval);    
+    } catch ( nogdb::Error& err ) {
+        Nan::ThrowError(err.what());
+    }
 }
 
 NAN_METHOD(Record::clear) 
 {
     Record *record = Nan::ObjectWrap::Unwrap<Record>(info.This());
-    record->base.clear();
-    info.GetReturnValue().SetUndefined();
+    try {
+        record->base.clear();
+        info.GetReturnValue().SetUndefined();    
+    } catch ( nogdb::Error& err ) {
+        Nan::ThrowError(err.what());
+    }
 }
 
 v8::Local<v8::Object> Record::NewInstance() {

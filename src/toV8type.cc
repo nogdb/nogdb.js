@@ -109,7 +109,6 @@ v8::Local<v8::Value> v8Record(nogdb::Record rec){
 
     Nan::Set(retval, Nan::New<v8::String>("className").ToLocalChecked(), Nan::New<v8::String>(rec.getClassName()).ToLocalChecked());
     Nan::Set(retval, Nan::New<v8::String>("rid").ToLocalChecked(), v8RecordId(rec.getRecordId()));
-    std::cout << rec.getRecordId() << std::endl;
     Nan::Set(retval, Nan::New<v8::String>("depth").ToLocalChecked(), Nan::New<v8::Number>(rec.getDepth()));
     Nan::Set(retval, Nan::New<v8::String>("version").ToLocalChecked(), Nan::New<v8::Number>(rec.getVersion()));
     Nan::Set(retval, Nan::New<v8::String>("size").ToLocalChecked(), Nan::New<v8::Number>(rec.size()));

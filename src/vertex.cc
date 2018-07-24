@@ -36,8 +36,23 @@ NAN_METHOD(Vertex::create)
         Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info[0]->ToObject());
         std::string className = *Nan::Utf8String(info[1]->ToString());
         Record *record = Nan::ObjectWrap::Unwrap<Record>(info[2]->ToObject());
-        nogdb::RecordDescriptor recD = nogdb::Vertex::create(*txn->base, className, record->base);
-        info.GetReturnValue().Set(v8RecordDescriptor(recD));
+        try {
+            nogdb::RecordDescriptor recD = nogdb::Vertex::create(*txn->base, className, record->base);
+            info.GetReturnValue().Set(v8RecordDescriptor(recD));
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        }
+    }
+    else if (info.Length() == 2  && txnType->HasInstance(info[0]->ToObject()) && info[1]->IsString())
+    {
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info[0]->ToObject());
+        std::string className = *Nan::Utf8String(info[1]->ToString());
+        try {
+            nogdb::RecordDescriptor recD = nogdb::Vertex::create(*txn->base, className);
+            info.GetReturnValue().Set(v8RecordDescriptor(recD));
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        }
     }
     else
     {
@@ -61,8 +76,13 @@ NAN_METHOD(Vertex::update)
         nogdb::RecordDescriptor recordD(classId,positionId);
 
         Record *record = Nan::ObjectWrap::Unwrap<Record>(info[2]->ToObject());
-        nogdb::Vertex::update(*txn->base, recordD, record->base);
-        info.GetReturnValue().SetUndefined();
+
+        try {
+            nogdb::Vertex::update(*txn->base, recordD, record->base);
+            info.GetReturnValue().SetUndefined();
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        }         
     }
     else
     {
@@ -84,13 +104,20 @@ NAN_METHOD(Vertex::destroy)
         unsigned int classId = Nan::Get(rid, Nan::New<v8::String>("classId").ToLocalChecked()).ToLocalChecked()->Uint32Value();
         unsigned int positionId = Nan::Get(rid, Nan::New<v8::String>("positionId").ToLocalChecked()).ToLocalChecked()->Uint32Value();
         nogdb::RecordDescriptor recordD(classId,positionId);
-
-        nogdb::Vertex::destroy(*txn->base, recordD);
+        try {
+            nogdb::Vertex::destroy(*txn->base, recordD);
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        }  
     }
     // ver 2 className
     else if(info[1]->IsString()){
         std::string className = *Nan::Utf8String(info[1]->ToString());
-        nogdb::Vertex::destroy(*txn->base, className);
+        try {
+            nogdb::Vertex::destroy(*txn->base, className);
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        } 
     } else {
         return Nan::ThrowError(Nan::New("Vertex.destroy() - invalid arugment(s)").ToLocalChecked());
     }
@@ -108,14 +135,22 @@ NAN_METHOD(Vertex::get)
     std::string className = *Nan::Utf8String(info[1]->ToString());
     // get
     if(info.Length() == 2){
-        nogdb::ResultSet resultSet = nogdb::Vertex::get(*txn->base,className);
-        info.GetReturnValue().Set(v8ResultSet(resultSet));
+        try {
+            nogdb::ResultSet resultSet = nogdb::Vertex::get(*txn->base,className);
+            info.GetReturnValue().Set(v8ResultSet(resultSet));
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        } 
     }
     // get with condition
     else if(info.Length() == 3 && conditionType->HasInstance(info[2]->ToObject())){
         Condition *cond = Nan::ObjectWrap::Unwrap<Condition>(info[2]->ToObject());
-        nogdb::ResultSet resultSet = nogdb::Vertex::get(*txn->base,className,cond->base);
-        info.GetReturnValue().Set(v8ResultSet(resultSet));
+        try {
+            nogdb::ResultSet resultSet = nogdb::Vertex::get(*txn->base,className,cond->base);
+            info.GetReturnValue().Set(v8ResultSet(resultSet));
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        } 
     }else {
         return Nan::ThrowError(Nan::New("Vertex.get() - invalid arugment(s)").ToLocalChecked());
     }
@@ -135,19 +170,46 @@ NAN_METHOD(Vertex::getInEdge)
     unsigned int classId = Nan::Get(rid, Nan::New<v8::String>("classId").ToLocalChecked()).ToLocalChecked()->Uint32Value();
     unsigned int positionId = Nan::Get(rid, Nan::New<v8::String>("positionId").ToLocalChecked()).ToLocalChecked()->Uint32Value();
     nogdb::RecordDescriptor recordD(classId,positionId);
+    // getInEdge undefined ClassFilter
+    if(info.Length() == 2){
+        try {
+            nogdb::ResultSet resultSet = nogdb::Vertex::getInEdge(*txn->base,recordD);
+            info.GetReturnValue().Set(v8ResultSet(resultSet));
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        }    
+    }
     // getInEdge
-    if(info.Length() == 3  && classFilterType->HasInstance(info[2]->ToObject())){
+    else if(info.Length() == 3  && classFilterType->HasInstance(info[2]->ToObject())){
         ClassFilter *classF = Nan::ObjectWrap::Unwrap<ClassFilter>(info[2]->ToObject());
-        nogdb::ResultSet resultSet = nogdb::Vertex::getInEdge(*txn->base,recordD,classF->base);
-        info.GetReturnValue().Set(v8ResultSet(resultSet));
+        try {
+            nogdb::ResultSet resultSet = nogdb::Vertex::getInEdge(*txn->base,recordD,classF->base);
+            info.GetReturnValue().Set(v8ResultSet(resultSet));
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        }    
+    }
+    // getInEdge with condition undefined ClassFilter
+    else if(info.Length() == 3  && conditionType->HasInstance(info[2]->ToObject())){
+        Condition *cond = Nan::ObjectWrap::Unwrap<Condition>(info[2]->ToObject());
+        try {
+            nogdb::ResultSet resultSet = nogdb::Vertex::getInEdge(*txn->base,recordD,cond->base);
+            info.GetReturnValue().Set(v8ResultSet(resultSet));
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        } 
     }
     // getInEdge with condition
     else if(info.Length() == 4  && conditionType->HasInstance(info[2]->ToObject()) 
                                 && classFilterType->HasInstance(info[3]->ToObject())){
         Condition *cond = Nan::ObjectWrap::Unwrap<Condition>(info[2]->ToObject());
         ClassFilter *classF = Nan::ObjectWrap::Unwrap<ClassFilter>(info[3]->ToObject());
-        nogdb::ResultSet resultSet = nogdb::Vertex::getInEdge(*txn->base,recordD,cond->base,classF->base);
-        info.GetReturnValue().Set(v8ResultSet(resultSet));
+        try {
+            nogdb::ResultSet resultSet = nogdb::Vertex::getInEdge(*txn->base,recordD,cond->base,classF->base);
+            info.GetReturnValue().Set(v8ResultSet(resultSet));
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        } 
     }else {
         return Nan::ThrowError(Nan::New("Vertex.getInEdge() - invalid arugment(s)").ToLocalChecked());
     }
@@ -167,19 +229,46 @@ NAN_METHOD(Vertex::getOutEdge)
     unsigned int classId = Nan::Get(rid, Nan::New<v8::String>("classId").ToLocalChecked()).ToLocalChecked()->Uint32Value();
     unsigned int positionId = Nan::Get(rid, Nan::New<v8::String>("positionId").ToLocalChecked()).ToLocalChecked()->Uint32Value();
     nogdb::RecordDescriptor recordD(classId,positionId);
+    // getOutEdge undefined ClassFilter
+    if(info.Length() == 2){
+        try {
+            nogdb::ResultSet resultSet = nogdb::Vertex::getOutEdge(*txn->base,recordD);
+            info.GetReturnValue().Set(v8ResultSet(resultSet));
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        }    
+    }
     // getOutEdge
-    if(info.Length() == 3  && classFilterType->HasInstance(info[2]->ToObject())){
+    else if(info.Length() == 3  && classFilterType->HasInstance(info[2]->ToObject())){
         ClassFilter *classF = Nan::ObjectWrap::Unwrap<ClassFilter>(info[2]->ToObject());
-        nogdb::ResultSet resultSet = nogdb::Vertex::getOutEdge(*txn->base,recordD,classF->base);
-        info.GetReturnValue().Set(v8ResultSet(resultSet));
+        try {
+            nogdb::ResultSet resultSet = nogdb::Vertex::getOutEdge(*txn->base,recordD,classF->base);
+            info.GetReturnValue().Set(v8ResultSet(resultSet));
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        }    
+    }
+    // getOutEdge with condition undefined ClassFilter
+    else if(info.Length() == 3  && conditionType->HasInstance(info[2]->ToObject())){
+        Condition *cond = Nan::ObjectWrap::Unwrap<Condition>(info[2]->ToObject());
+        try {
+            nogdb::ResultSet resultSet = nogdb::Vertex::getOutEdge(*txn->base,recordD,cond->base);
+            info.GetReturnValue().Set(v8ResultSet(resultSet));
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        } 
     }
     // getOutEdge with condition
     else if(info.Length() == 4  && conditionType->HasInstance(info[2]->ToObject()) 
                                 && classFilterType->HasInstance(info[3]->ToObject())){
         Condition *cond = Nan::ObjectWrap::Unwrap<Condition>(info[2]->ToObject());
         ClassFilter *classF = Nan::ObjectWrap::Unwrap<ClassFilter>(info[3]->ToObject());
-        nogdb::ResultSet resultSet = nogdb::Vertex::getOutEdge(*txn->base,recordD,cond->base,classF->base);
-        info.GetReturnValue().Set(v8ResultSet(resultSet));
+        try {
+            nogdb::ResultSet resultSet = nogdb::Vertex::getOutEdge(*txn->base,recordD,cond->base,classF->base);
+            info.GetReturnValue().Set(v8ResultSet(resultSet));
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        } 
     }else {
         return Nan::ThrowError(Nan::New("Vertex.getOutEdge() - invalid arugment(s)").ToLocalChecked());
     }
@@ -199,19 +288,46 @@ NAN_METHOD(Vertex::getAllEdge)
     unsigned int classId = Nan::Get(rid, Nan::New<v8::String>("classId").ToLocalChecked()).ToLocalChecked()->Uint32Value();
     unsigned int positionId = Nan::Get(rid, Nan::New<v8::String>("positionId").ToLocalChecked()).ToLocalChecked()->Uint32Value();
     nogdb::RecordDescriptor recordD(classId,positionId);
+    // getAllEdge undefined ClassFilter
+    if(info.Length() == 2){
+        try {
+            nogdb::ResultSet resultSet = nogdb::Vertex::getAllEdge(*txn->base,recordD);
+            info.GetReturnValue().Set(v8ResultSet(resultSet));
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        }    
+    }
     // getAllEdge
-    if(info.Length() == 3  && classFilterType->HasInstance(info[2]->ToObject())){
+    else if(info.Length() == 3  && classFilterType->HasInstance(info[2]->ToObject())){
         ClassFilter *classF = Nan::ObjectWrap::Unwrap<ClassFilter>(info[2]->ToObject());
-        nogdb::ResultSet resultSet = nogdb::Vertex::getAllEdge(*txn->base,recordD,classF->base);
-        info.GetReturnValue().Set(v8ResultSet(resultSet));
+        try {
+            nogdb::ResultSet resultSet = nogdb::Vertex::getAllEdge(*txn->base,recordD,classF->base);
+            info.GetReturnValue().Set(v8ResultSet(resultSet));
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        }    
+    }
+    // getAllEdge with condition undefined ClassFilter
+    else if(info.Length() == 3  && conditionType->HasInstance(info[2]->ToObject())){
+        Condition *cond = Nan::ObjectWrap::Unwrap<Condition>(info[2]->ToObject());
+        try {
+            nogdb::ResultSet resultSet = nogdb::Vertex::getAllEdge(*txn->base,recordD,cond->base);
+            info.GetReturnValue().Set(v8ResultSet(resultSet));
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        } 
     }
     // getAllEdge with condition
     else if(info.Length() == 4  && conditionType->HasInstance(info[2]->ToObject()) 
                                 && classFilterType->HasInstance(info[3]->ToObject())){
         Condition *cond = Nan::ObjectWrap::Unwrap<Condition>(info[2]->ToObject());
         ClassFilter *classF = Nan::ObjectWrap::Unwrap<ClassFilter>(info[3]->ToObject());
-        nogdb::ResultSet resultSet = nogdb::Vertex::getAllEdge(*txn->base,recordD,cond->base,classF->base);
-        info.GetReturnValue().Set(v8ResultSet(resultSet));
+        try {
+            nogdb::ResultSet resultSet = nogdb::Vertex::getAllEdge(*txn->base,recordD,cond->base,classF->base);
+            info.GetReturnValue().Set(v8ResultSet(resultSet));
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        } 
     }else {
         return Nan::ThrowError(Nan::New("Vertex.getAllEdge() - invalid arugment(s)").ToLocalChecked());
     }
@@ -227,9 +343,12 @@ NAN_METHOD(Vertex::getIndex)
         Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info[0]->ToObject());
         std::string className = *Nan::Utf8String(info[1]->ToString());
         Condition *cond = Nan::ObjectWrap::Unwrap<Condition>(info[2]->ToObject());
-
-        nogdb::ResultSet resultSet = nogdb::Vertex::getIndex(*txn->base,className,cond->base);
-        info.GetReturnValue().Set(v8ResultSet(resultSet));
+        try {
+            nogdb::ResultSet resultSet = nogdb::Vertex::getIndex(*txn->base,className,cond->base);
+            info.GetReturnValue().Set(v8ResultSet(resultSet));
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        } 
     }
     else
     {

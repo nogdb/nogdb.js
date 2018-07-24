@@ -4,7 +4,8 @@
             "target_name": "nogdb_js",
             "cflags_cc": [
                 "-std=c++11",
-                "-Wall"
+                "-Wall",
+                "-fexceptions"
             ],
             "sources": [
                 "src/init_module.cc",

@@ -48,7 +48,7 @@ NAN_METHOD(Txn::New)
 
         Txn *txn = new Txn(baseTxn);
         txn->Wrap(info.Holder());
-
+        
         info.GetReturnValue().Set(info.Holder());
     }
     else
@@ -60,31 +60,52 @@ NAN_METHOD(Txn::New)
 NAN_METHOD(Txn::commit)
 {
     Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
-    txn->base->commit();
-    info.GetReturnValue().SetUndefined();
+    try {
+        txn->base->commit();
+        info.GetReturnValue().SetUndefined();        
+    } catch ( nogdb::Error& err ) {
+        Nan::ThrowError(err.what());
+    }
 }
 
 NAN_METHOD(Txn::rollback) {
     Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
-    txn->base->rollback();
-    info.GetReturnValue().SetUndefined();
+    try {
+        txn->base->rollback();
+        info.GetReturnValue().SetUndefined();        
+    } catch ( nogdb::Error& err ) {
+        Nan::ThrowError(err.what());
+    }
 }
 
 NAN_METHOD(Txn::getTxnId) {
     Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
-    int txnId =  txn->base->getTxnId();
-    info.GetReturnValue().Set(txnId);
+    try {
+        int txnId =  txn->base->getTxnId();
+        info.GetReturnValue().Set(txnId);        
+    } catch ( nogdb::Error& err ) {
+        Nan::ThrowError(err.what());
+    }
 }
 
 NAN_METHOD(Txn::getVersionId) {
     Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
-    int verId =  txn->base->getVersionId();
-    info.GetReturnValue().Set(verId);
+    try {
+        int verId =  txn->base->getVersionId();
+        info.GetReturnValue().Set(verId);        
+    } catch ( nogdb::Error& err ) {
+        Nan::ThrowError(err.what());
+    }
+    
 }
   NAN_METHOD(Txn::getTxnMode) {
     Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
-    int txnMode =  txn->base->getTxnMode();
-    info.GetReturnValue().Set(txnMode);
+    try {
+        int txnMode =  txn->base->getTxnMode();
+        info.GetReturnValue().Set(txnMode);        
+    } catch ( nogdb::Error& err ) {
+        Nan::ThrowError(err.what());
+    }
 }
 
 v8::Local<v8::Object> Txn::NewInstance(v8::Local<v8::Value> ctx,v8::Local<v8::Value> mode) {

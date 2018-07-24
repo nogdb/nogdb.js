@@ -44,9 +44,12 @@ NAN_METHOD(Property::add)
         else if(type=="REAL")               propertyType = nogdb::PropertyType::REAL;
         else if(type=="BLOB")               propertyType = nogdb::PropertyType::BLOB;
         else Nan::ThrowError("propertyType Invalid");
-        
-        nogdb::PropertyDescriptor propD = nogdb::Property::add(*txn->base,className,propertyName,propertyType);
-        info.GetReturnValue().Set(v8PropertyDescriptor(propD));
+        try {
+            nogdb::PropertyDescriptor propD = nogdb::Property::add(*txn->base,className,propertyName,propertyType);
+            info.GetReturnValue().Set(v8PropertyDescriptor(propD));
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        } 
     }
     else
     {
@@ -64,10 +67,12 @@ NAN_METHOD(Property::alter)
         std::string className = *Nan::Utf8String(info[1]->ToString());
         std::string oldPropertyName = *Nan::Utf8String(info[2]->ToString());
         std::string newPropertyName = *Nan::Utf8String(info[3]->ToString());
-        
-        nogdb::Property::alter(*txn->base,className,oldPropertyName,newPropertyName);
-
-        info.GetReturnValue().SetUndefined();
+        try {
+            nogdb::Property::alter(*txn->base,className,oldPropertyName,newPropertyName);
+            info.GetReturnValue().SetUndefined();
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        } 
     }
     else
     {
@@ -84,10 +89,12 @@ NAN_METHOD(Property::remove)
         Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info[0]->ToObject());
         std::string className = *Nan::Utf8String(info[1]->ToString());
         std::string propertyName = *Nan::Utf8String(info[2]->ToString());
-        
-        nogdb::Property::remove(*txn->base,className,propertyName);
-
-        info.GetReturnValue().SetUndefined();
+        try {
+            nogdb::Property::remove(*txn->base,className,propertyName);
+            info.GetReturnValue().SetUndefined();
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        } 
     }
     else
     {
@@ -105,10 +112,24 @@ NAN_METHOD(Property::createIndex)
         std::string className = *Nan::Utf8String(info[1]->ToString());
         std::string propertyName = *Nan::Utf8String(info[2]->ToString());
         bool isUnique = info[3]->BooleanValue();
-
-        nogdb::Property::createIndex(*txn->base,className,propertyName,isUnique);
-
-        info.GetReturnValue().SetUndefined();
+        try {
+            nogdb::Property::createIndex(*txn->base,className,propertyName,isUnique);
+            info.GetReturnValue().SetUndefined();
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        } 
+    }else if(info.Length() == 3 && txnType->HasInstance(info[0]->ToObject()) && info[1]->IsString() 
+                                && info[2]->IsString())
+    {
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info[0]->ToObject());
+        std::string className = *Nan::Utf8String(info[1]->ToString());
+        std::string propertyName = *Nan::Utf8String(info[2]->ToString());
+        try {
+            nogdb::Property::createIndex(*txn->base,className,propertyName);
+            info.GetReturnValue().SetUndefined();
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        } 
     }
     else
     {
@@ -125,10 +146,12 @@ NAN_METHOD(Property::dropIndex)
         Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info[0]->ToObject());
         std::string className = *Nan::Utf8String(info[1]->ToString());
         std::string propertyName = *Nan::Utf8String(info[2]->ToString());
-
-        nogdb::Property::dropIndex(*txn->base,className,propertyName);
-
-        info.GetReturnValue().SetUndefined();
+        try {
+            nogdb::Property::dropIndex(*txn->base,className,propertyName);
+            info.GetReturnValue().SetUndefined();
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        }
     }
     else
     {
