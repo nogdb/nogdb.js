@@ -205,16 +205,6 @@ NAN_METHOD(Condition::contain) {
             Nan::ThrowError(err.what());
         }
     } 
-    else if (info.Length() == 1 && info[0]->IsNumber())
-    {
-        double value = info[0]->NumberValue();
-        try {
-            cond->base = cond->base.contain(value);
-            info.GetReturnValue().SetUndefined();    
-        } catch ( nogdb::Error& err ) {
-            Nan::ThrowError(err.what());
-        } 
-    }
     else
     {
         return Nan::ThrowError(Nan::New("Condition.contain() - invalid arugment(s)").ToLocalChecked());
@@ -233,16 +223,6 @@ NAN_METHOD(Condition::beginWith) {
             Nan::ThrowError(err.what());
         }
     } 
-    else if (info.Length() == 1 && info[0]->IsNumber())
-    {
-        double value = info[0]->NumberValue();
-        try {
-            cond->base = cond->base.beginWith(value);
-            info.GetReturnValue().SetUndefined();    
-        } catch ( nogdb::Error& err ) {
-            Nan::ThrowError(err.what());
-        }
-    }
     else
     {
         return Nan::ThrowError(Nan::New("Condition.beginWith() - invalid arugment(s)").ToLocalChecked());
@@ -261,16 +241,6 @@ NAN_METHOD(Condition::endWith) {
             Nan::ThrowError(err.what());
         }
     } 
-    else if (info.Length() == 1 && info[0]->IsNumber())
-    {
-        double value = info[0]->NumberValue();
-        try {
-            cond->base = cond->base.endWith(value);
-            info.GetReturnValue().SetUndefined();    
-        } catch ( nogdb::Error& err ) {
-            Nan::ThrowError(err.what());
-        }
-    }
     else
     {
         return Nan::ThrowError(Nan::New("Condition.endWith() - invalid arugment(s)").ToLocalChecked());
@@ -289,16 +259,6 @@ NAN_METHOD(Condition::like) {
             Nan::ThrowError(err.what());
         }     
     } 
-    else if (info.Length() == 1 && info[0]->IsNumber())
-    {
-        double value = info[0]->NumberValue();
-        try {
-            cond->base = cond->base.like(value);
-            info.GetReturnValue().SetUndefined();    
-        } catch ( nogdb::Error& err ) {
-            Nan::ThrowError(err.what());
-        } 
-    }
     else
     {
         return Nan::ThrowError(Nan::New("Condition.like() - invalid arugment(s)").ToLocalChecked());
@@ -317,16 +277,6 @@ NAN_METHOD(Condition::regex) {
             Nan::ThrowError(err.what());
         } 
     } 
-    else if (info.Length() == 1 && info[0]->IsNumber())
-    {
-        double value = info[0]->NumberValue();
-        try {
-            cond->base = cond->base.regex(value);
-            info.GetReturnValue().SetUndefined();    
-        } catch ( nogdb::Error& err ) {
-            Nan::ThrowError(err.what());
-        }
-    }
     else
     {
         return Nan::ThrowError(Nan::New("Condition.regex() - invalid arugment(s)").ToLocalChecked());
