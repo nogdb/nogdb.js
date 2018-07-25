@@ -18,10 +18,44 @@ npm install
 
 ------------
 ## How to use
-In file javascript require nogdb in this form.
+- **First step** In file javascript require nogdb in this form.
+
 ```javascript
-	const nogdb = require("./build/Debug/nogdb_js");
+const nogdb = require("./build/Debug/nogdb_js");
 ```
+- **Second step** you must be create [Database Context](https://github.com/nogdb/nogdb.js/blob/master/doc.md#database-context "Database Context") before use another function like this.
+
+```javascript
+// "mygraph.db" is database path.
+const ctx = new nogdb.Context("mygraph.db");
+```
+
+- **Third step** And create [Transaction](https://github.com/nogdb/nogdb.js/blob/master/doc.md#transaction "Transaction") for use [Database operations](Database Operations "Database operations") like this.
+
+```javascript
+// Transaction has 2 mode "READ_WRITE" for modifired database and "READ_ONLY" can't modified database
+var txn = new nogdb.Txn(ctx,"READ_WRITE");
+```
+> In "READ_WRITE" mode you can call `txn.commit();` after complete the transaction for affect to database.
+
+- **Fourth step** you can use [Database operations](Database Operations "Database operations").
+
+ - `Class` Operations from [nogdb.Class](https://github.com/nogdb/nogdb.js/blob/master/doc.md#class-operations "nogdb.Class")
+
+  - `Property` Operations from [nogdb.Property](https://github.com/nogdb/nogdb.js/blob/master/doc.md#property-operations "nogdb.Property")
+
+  - `Database` Operations from [nogdb.Db](https://github.com/nogdb/nogdb.js/blob/master/doc.md#database-operations "nogdb.Db")
+
+  - `Vertex` Operations from [nogdb.Vertex](https://github.com/nogdb/nogdb.js/blob/master/doc.md#vertex-operations "nogdb.Vertex")
+
+  - `Edge` Operations from [nogdb.Edge](https://github.com/nogdb/nogdb.js/blob/master/doc.md#edge-operations "nogdb.Edge")
+
+  - `Traverse` (Graph) Operations from [nogdb.Traverse](https://github.com/nogdb/nogdb.js/blob/master/doc.md#traverse-graph-operations "nogdb.Traverse")
+
+#### See more [Document](https://github.com/nogdb/nogdb.js/blob/master/doc.md "Document")
+
+------------
+
 
 ## Examples using nogdb.js
 
@@ -40,7 +74,7 @@ In file javascript require nogdb in this form.
 // Create edge 'WordLinks'
 	nogdb.Class.create(txn,"WordLinks","EDGE");
 ```
-- Create Property `string` within VERTEX `Words`
+- Create Property `messaged` within VERTEX `Words`
 
 ```javascript
 	const nogdb = require("./build/Debug/nogdb_js");
@@ -48,7 +82,7 @@ In file javascript require nogdb in this form.
 	var txn = new nogdb.Txn(ctx,"READ_WRITE");
 
 // create property 'string' within vertex 'Words' (also applied to 'InitialWords')
-	nogdb.Property.add(txn, "Words", "string", "TEXT");
+	nogdb.Property.add(txn, "Words", "messaged", "TEXT");
 ```
 - Create vertices for `InitialWords` and `Words`. And create link between them.
 
@@ -60,8 +94,8 @@ In file javascript require nogdb in this form.
 // Create prototypes of vertices
 	hello = new nogdb.Record();
 	world = new nogdb.Record();
-	hello.set("string", "Hello");
-	world.set("string", ", World.");
+	hello.set("messaged", "Hello");
+	world.set("messaged", ", World.");
 // Create vertices to db with created prototypes
 	vHello = nogdb.Vertex.create(txn, "InitialWords", hello);
 	vWorld = nogdb.Vertex.create(txn, "Words", world);
@@ -82,13 +116,13 @@ In file javascript require nogdb in this form.
 // Get initial word from 'InitialWords'
 	word1 = nogdb.Vertex.get(txn, "InitialWords");
 // Get property 'string' from vertex and print to screen
-	str_vertex = word1[0].record.value.string.toText;
+	str_vertex = word1[0].record.value.messaged.toText;
 // Get out edge from record
 	edge = nogdb.Vertex.getOutEdge(txn,word1[0].recordDescriptor);
 // Get destination vertex from edge
 	word2 = nogdb.Edge.getDst(txn,edge[0].recordDescriptor);
 // Get property 'string' from another vertex and print to screen
-	str_another = word2.record.value.string.toText;
+	str_another = word2.record.value.messaged.toText;
 // Print show result
 	console.log(str_vertex + str_another);
 ```
@@ -112,12 +146,12 @@ const nogdb = require("./build/Debug/nogdb_js");
 // Create edge 'WordLinks'
 	nogdb.Class.create(txn,"WordLinks","EDGE");
 // create property 'string' within vertex 'Words' (also applied to 'InitialWords')
-	nogdb.Property.add(txn, "Words", "string", "TEXT");
+	nogdb.Property.add(txn, "Words", "messaged", "TEXT");
 // Create prototypes of vertices
 	hello = new nogdb.Record();
 	world = new nogdb.Record();
-	hello.set("string", "Hello");
-	world.set("string", ", World.");
+	hello.set("messaged", "Hello");
+	world.set("messaged", ", World.");
 // Create vertices to db with created prototypes
 	vHello = nogdb.Vertex.create(txn, "InitialWords", hello);
 	vWorld = nogdb.Vertex.create(txn, "Words", world);
@@ -132,13 +166,13 @@ const nogdb = require("./build/Debug/nogdb_js");
 // Get initial word from 'InitialWords'
 	word1 = nogdb.Vertex.get(txn, "InitialWords");
 // Get property 'string' from vertex and print to screen
-	str_vertex = word1[0].record.value.string.toText;
+	str_vertex = word1[0].record.value.messaged.toText;
 // Get out edge from record
 	edge = nogdb.Vertex.getOutEdge(txn,word1[0].recordDescriptor);
 // Get destination vertex from edge
 	word2 = nogdb.Edge.getDst(txn,edge[0].recordDescriptor);
 // Get property 'string' from another vertex and print to screen
-	str_another = word2.record.value.string.toText;
+	str_another = word2.record.value.messaged.toText;
 // Print result
 	console.log(str_vertex + str_another);
 
