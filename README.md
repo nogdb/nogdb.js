@@ -38,19 +38,19 @@ var txn = new nogdb.Txn(ctx,"READ_WRITE");
 ```
 > In "READ_WRITE" mode you can call `txn.commit();` after complete the transaction for affect to database.
 
-- **Fourth step** you can use [Database operations](Database Operations "Database operations").
+- **Fourth step** you can use [Database operations](Database Operations "Database operations") .
 
  - `Class` Operations from [nogdb.Class](https://github.com/nogdb/nogdb.js/blob/master/doc.md#class-operations "nogdb.Class")
 
-  - `Property` Operations from [nogdb.Property](https://github.com/nogdb/nogdb.js/blob/master/doc.md#property-operations "nogdb.Property")
+   - `Property` Operations from [nogdb.Property](https://github.com/nogdb/nogdb.js/blob/master/doc.md#property-operations "nogdb.Property")
 
-  - `Database` Operations from [nogdb.Db](https://github.com/nogdb/nogdb.js/blob/master/doc.md#database-operations "nogdb.Db")
+   - `Database` Operations from [nogdb.Db](https://github.com/nogdb/nogdb.js/blob/master/doc.md#database-operations "nogdb.Db")
 
-  - `Vertex` Operations from [nogdb.Vertex](https://github.com/nogdb/nogdb.js/blob/master/doc.md#vertex-operations "nogdb.Vertex")
+   - `Vertex` Operations from [nogdb.Vertex](https://github.com/nogdb/nogdb.js/blob/master/doc.md#vertex-operations "nogdb.Vertex")
 
-  - `Edge` Operations from [nogdb.Edge](https://github.com/nogdb/nogdb.js/blob/master/doc.md#edge-operations "nogdb.Edge")
+   - `Edge` Operations from [nogdb.Edge](https://github.com/nogdb/nogdb.js/blob/master/doc.md#edge-operations "nogdb.Edge")
 
-  - `Traverse` (Graph) Operations from [nogdb.Traverse](https://github.com/nogdb/nogdb.js/blob/master/doc.md#traverse-graph-operations "nogdb.Traverse")
+   - `Traverse` (Graph) Operations from [nogdb.Traverse](https://github.com/nogdb/nogdb.js/blob/master/doc.md#traverse-graph-operations "nogdb.Traverse")
 
 #### See more [Document](https://github.com/nogdb/nogdb.js/blob/master/doc.md "Document")
 
