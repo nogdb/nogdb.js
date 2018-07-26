@@ -30,7 +30,7 @@ const nogdb = require("./build/Release/nogdb_js");
 const ctx = new nogdb.Context("mygraph.db");
 ```
 
-- **Third step** And create [Transaction](https://github.com/nogdb/nogdb.js/blob/master/doc.md#transaction "Transaction") for use [Database operations](Database Operations "Database operations") like this.
+- **Third step** And create [Transaction](https://github.com/nogdb/nogdb.js/blob/master/doc.md#transaction "Transaction") for use [Database operations](https://github.com/nogdb/nogdb.js/blob/master/doc.md#nogdbjs-operations) like this.
 
 ```javascript
 // Transaction has 2 mode "READ_WRITE" for modifired database and "READ_ONLY" can't modified database
@@ -38,7 +38,7 @@ var txn = new nogdb.Txn(ctx,"READ_WRITE");
 ```
 > In "READ_WRITE" mode you can call `txn.commit();` after complete the transaction for affect to database.
 
-- **Fourth step** you can use [Database operations](Database Operations "Database operations") .
+- **Fourth step** you can use [Database operations](https://github.com/nogdb/nogdb.js/blob/master/doc.md#nogdbjs-operations) .
 
  - `Class` Operations from [nogdb.Class](https://github.com/nogdb/nogdb.js/blob/master/doc.md#class-operations "nogdb.Class")
 
