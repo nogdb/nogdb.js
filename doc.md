@@ -738,7 +738,7 @@ var recordDescriptor = nogdb.Vertex.create(txn,className);					// record is empt
 
 #### update()
 ```javascript
-nogdb.Vertex.upadte(txn,recordDescriptor,record);
+nogdb.Vertex.update(txn,recordDescriptor,record);
 ```
 - Description:
    - To update a vertex.

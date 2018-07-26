@@ -1,5 +1,5 @@
 // hello_world.js
-const nogdb = require("./build/Debug/nogdb_js");
+const nogdb = require("./build/Release/nogdb_js");
 
 // Create database context pointing to file 'mygraph.db'
 	const ctx = new nogdb.Context("mygraph.db");

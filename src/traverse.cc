@@ -23,8 +23,8 @@ NAN_MODULE_INIT(Traverse::Init)
 
 NAN_METHOD(Traverse::inEdgeBfs)
 {
-    v8::Local<v8::FunctionTemplate> classFilterType = Nan::New<v8::FunctionTemplate>(Txn::constructor);
-    v8::Local<v8::FunctionTemplate> txnType = Nan::New<v8::FunctionTemplate>(ClassFilter::constructor);
+    v8::Local<v8::FunctionTemplate> txnType = Nan::New<v8::FunctionTemplate>(Txn::constructor);
+    v8::Local<v8::FunctionTemplate> classFilterType = Nan::New<v8::FunctionTemplate>(ClassFilter::constructor);
     if (info.Length() == 5  && txnType->HasInstance(info[0]->ToObject()) && info[1]->IsObject() 
                             && info[2]->IsUint32() && info[3]->IsUint32()
                             && classFilterType->HasInstance(info[4]->ToObject()))
@@ -77,8 +77,8 @@ NAN_METHOD(Traverse::inEdgeBfs)
 
 NAN_METHOD(Traverse::outEdgeBfs)
 {
-    v8::Local<v8::FunctionTemplate> classFilterType = Nan::New<v8::FunctionTemplate>(Txn::constructor);
-    v8::Local<v8::FunctionTemplate> txnType = Nan::New<v8::FunctionTemplate>(ClassFilter::constructor);
+    v8::Local<v8::FunctionTemplate> txnType = Nan::New<v8::FunctionTemplate>(Txn::constructor);
+    v8::Local<v8::FunctionTemplate> classFilterType = Nan::New<v8::FunctionTemplate>(ClassFilter::constructor);
     if (info.Length() == 5  && txnType->HasInstance(info[0]->ToObject()) && info[1]->IsObject() 
                             && info[2]->IsUint32() && info[3]->IsUint32()
                             && classFilterType->HasInstance(info[4]->ToObject()))
@@ -132,8 +132,8 @@ NAN_METHOD(Traverse::outEdgeBfs)
 
 NAN_METHOD(Traverse::allEdgeBfs)
 {
-    v8::Local<v8::FunctionTemplate> classFilterType = Nan::New<v8::FunctionTemplate>(Txn::constructor);
-    v8::Local<v8::FunctionTemplate> txnType = Nan::New<v8::FunctionTemplate>(ClassFilter::constructor);
+    v8::Local<v8::FunctionTemplate> txnType = Nan::New<v8::FunctionTemplate>(Txn::constructor);
+    v8::Local<v8::FunctionTemplate> classFilterType = Nan::New<v8::FunctionTemplate>(ClassFilter::constructor);
     if (info.Length() == 5  && txnType->HasInstance(info[0]->ToObject()) && info[1]->IsObject() 
                             && info[2]->IsUint32() && info[3]->IsUint32()
                             && classFilterType->HasInstance(info[4]->ToObject()))
@@ -186,8 +186,8 @@ NAN_METHOD(Traverse::allEdgeBfs)
 
 NAN_METHOD(Traverse::inEdgeDfs)
 {
-    v8::Local<v8::FunctionTemplate> classFilterType = Nan::New<v8::FunctionTemplate>(Txn::constructor);
-    v8::Local<v8::FunctionTemplate> txnType = Nan::New<v8::FunctionTemplate>(ClassFilter::constructor);
+    v8::Local<v8::FunctionTemplate> txnType = Nan::New<v8::FunctionTemplate>(Txn::constructor);
+    v8::Local<v8::FunctionTemplate> classFilterType = Nan::New<v8::FunctionTemplate>(ClassFilter::constructor);
     if (info.Length() == 5  && txnType->HasInstance(info[0]->ToObject()) && info[1]->IsObject() 
                             && info[2]->IsUint32() && info[3]->IsUint32()
                             && classFilterType->HasInstance(info[4]->ToObject()))
@@ -240,8 +240,8 @@ NAN_METHOD(Traverse::inEdgeDfs)
 
 NAN_METHOD(Traverse::outEdgeDfs)
 {
-    v8::Local<v8::FunctionTemplate> classFilterType = Nan::New<v8::FunctionTemplate>(Txn::constructor);
-    v8::Local<v8::FunctionTemplate> txnType = Nan::New<v8::FunctionTemplate>(ClassFilter::constructor);
+    v8::Local<v8::FunctionTemplate> txnType = Nan::New<v8::FunctionTemplate>(Txn::constructor);
+    v8::Local<v8::FunctionTemplate> classFilterType = Nan::New<v8::FunctionTemplate>(ClassFilter::constructor);
     if (info.Length() == 5  && txnType->HasInstance(info[0]->ToObject()) && info[1]->IsObject() 
                             && info[2]->IsUint32() && info[3]->IsUint32()
                             && classFilterType->HasInstance(info[4]->ToObject()))
@@ -294,8 +294,8 @@ NAN_METHOD(Traverse::outEdgeDfs)
 
 NAN_METHOD(Traverse::allEdgeDfs)
 {
-    v8::Local<v8::FunctionTemplate> classFilterType = Nan::New<v8::FunctionTemplate>(Txn::constructor);
-    v8::Local<v8::FunctionTemplate> txnType = Nan::New<v8::FunctionTemplate>(ClassFilter::constructor);
+    v8::Local<v8::FunctionTemplate> txnType = Nan::New<v8::FunctionTemplate>(Txn::constructor);
+    v8::Local<v8::FunctionTemplate> classFilterType = Nan::New<v8::FunctionTemplate>(ClassFilter::constructor);
     if (info.Length() == 5  && txnType->HasInstance(info[0]->ToObject()) && info[1]->IsObject() 
                             && info[2]->IsUint32() && info[3]->IsUint32()
                             && classFilterType->HasInstance(info[4]->ToObject()))
@@ -348,8 +348,8 @@ NAN_METHOD(Traverse::allEdgeDfs)
 
 NAN_METHOD(Traverse::shortestPath)
 {
-    v8::Local<v8::FunctionTemplate> classFilterType = Nan::New<v8::FunctionTemplate>(Txn::constructor);
-    v8::Local<v8::FunctionTemplate> txnType = Nan::New<v8::FunctionTemplate>(ClassFilter::constructor);
+    v8::Local<v8::FunctionTemplate> txnType = Nan::New<v8::FunctionTemplate>(Txn::constructor);
+    v8::Local<v8::FunctionTemplate> classFilterType = Nan::New<v8::FunctionTemplate>(ClassFilter::constructor);
     if (info.Length() == 4  && txnType->HasInstance(info[0]->ToObject()) && info[1]->IsObject() 
                             && info[2]->IsObject() && classFilterType->HasInstance(info[3]->ToObject()))
     {

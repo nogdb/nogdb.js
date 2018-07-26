@@ -31,7 +31,7 @@ NAN_METHOD(Property::add)
         std::string propertyName = *Nan::Utf8String(info[2]->ToString());
         std::string type = *Nan::Utf8String(info[3]->ToString());
 
-        nogdb::PropertyType propertyType;
+        nogdb::PropertyType propertyType = nogdb::PropertyType::TEXT;
         if(type=="TINYINT")                 propertyType = nogdb::PropertyType::TINYINT;
         else if(type=="UNSIGNED_TINYINT")   propertyType = nogdb::PropertyType::UNSIGNED_TINYINT;
         else if(type=="SMALLINT")           propertyType = nogdb::PropertyType::SMALLINT;

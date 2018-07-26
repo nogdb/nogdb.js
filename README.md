@@ -21,7 +21,7 @@ npm install
 - **First step** In file javascript require nogdb in this form.
 
 ```javascript
-const nogdb = require("./build/Debug/nogdb_js");
+const nogdb = require("./build/Release/nogdb_js");
 ```
 - **Second step** you must be create [Database Context](https://github.com/nogdb/nogdb.js/blob/master/doc.md#database-context "Database Context") before use another function like this.
 
@@ -62,7 +62,7 @@ var txn = new nogdb.Txn(ctx,"READ_WRITE");
 - Create classes VERTEX `Words` for words, VERTEX `InitialWords` for starting words and EDGE` WordLinks` for linking words
 
 ```javascript
-	const nogdb = require("./build/Debug/nogdb_js");
+	const nogdb = require("./build/Release/nogdb_js");
 // Create database context pointing to file 'mygraph.db'
 	const ctx = new nogdb.Context("mygraph.db");
 // Create READ_WRITE transaction
@@ -77,7 +77,7 @@ var txn = new nogdb.Txn(ctx,"READ_WRITE");
 - Create Property `messaged` within VERTEX `Words`
 
 ```javascript
-	const nogdb = require("./build/Debug/nogdb_js");
+	const nogdb = require("./build/Release/nogdb_js");
 	const ctx = new nogdb.Context("mygraph.db");
 	var txn = new nogdb.Txn(ctx,"READ_WRITE");
 
@@ -87,7 +87,7 @@ var txn = new nogdb.Txn(ctx,"READ_WRITE");
 - Create vertices for `InitialWords` and `Words`. And create link between them.
 
 ```javascript
-	const nogdb = require("./build/Debug/nogdb_js");
+	const nogdb = require("./build/Release/nogdb_js");
 	const ctx = new nogdb.Context("mygraph.db");
 	var txn = new nogdb.Txn(ctx,"READ_WRITE");
 
@@ -108,7 +108,7 @@ var txn = new nogdb.Txn(ctx,"READ_WRITE");
 - Get Initial Word, go to another word through edge, print string for every word passed.
 
 ```javascript
-	const nogdb = require("./build/Debug/nogdb_js");
+	const nogdb = require("./build/Release/nogdb_js");
 	const ctx = new nogdb.Context("mygraph.db");
 
 // Create READ_ONLY transaction
@@ -131,7 +131,7 @@ var txn = new nogdb.Txn(ctx,"READ_WRITE");
 
 ```javascript
 // hello_world.js
-const nogdb = require("./build/Debug/nogdb_js");
+const nogdb = require("./build/Release/nogdb_js");
 
 // Create database context pointing to file 'mygraph.db'
 	const ctx = new nogdb.Context("mygraph.db");

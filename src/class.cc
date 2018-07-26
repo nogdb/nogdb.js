@@ -29,7 +29,7 @@ NAN_METHOD(Class::create)
         std::string className = *Nan::Utf8String(info[1]->ToString());
         std::string type = *Nan::Utf8String(info[2]->ToString());
 
-        nogdb::ClassType classType;
+        nogdb::ClassType classType = nogdb::ClassType::VERTEX;
         if(type=="VERTEX")      classType = nogdb::ClassType::VERTEX;
         else if(type=="EDGE")   classType = nogdb::ClassType::EDGE;
         else Nan::ThrowError("ClassType Invalid");
