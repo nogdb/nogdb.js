@@ -26,4 +26,6 @@ private:
     static NAN_METHOD(regex) ;
     static NAN_METHOD(ignoreCase) ;
     static NAN_METHOD(null) ;
+    static NAN_METHOD(in) ;
+    static NAN_METHOD(between) ;
 };

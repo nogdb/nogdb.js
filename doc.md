@@ -1,4 +1,40 @@
 # nogdb.js Documentation
+- Object
+   - [Database Context](#database-context)
+     - [Functions of Context Object (Transaction Stats)](#functions-of-context-object-transaction-stats)
+   - [Transaction](#transaction)
+     - [Functions of Txn Object](#functions-of-txn-object)
+   - [Record](#record)
+     - [Functions of Record Object](#functions-of-record-object)
+   - [Condition](#condition)
+     - [Functions of Record Object](#functions-of-condition-object)
+   - [Class Filter](#class-filter)
+     - [Functions of ClassFilter Object](#functions-of-classfilter-object)
+   - [Structure of return value](#structure-of-return-value)
+     - [ClassDescriptor {}](#classdescriptor-)
+     - [PropertyDescriptor {}](#propertydescriptor-)
+     - [RecordDescriptor {}](#recorddescriptor-)
+     - [Record {}](#record-)
+     - [RecordId {}](#recordid-)
+     - [ResultSet](#resultset)
+     - [Result {}](#result-)
+     - [DbInfo {}](#dbinfo-)
+
+- [nogdb.js Operations](#nogdbjs-operations)
+
+| [Class Operations](#class-operations)  | [Property Operations](#property-operations)  | [Database Operations](#database-operations) | [Vertex Operations](#vertex-operations) | [Edge Operations](#edge-operations) | [Traverse (Graph) Operations](#traverse-graph-operations)
+| :------------ | :------------ | :------------ | :------------ | :------------ | :------------ |
+|[create()](#create)|[add()](#add-1)|[getRecord()](#getrecord)|[create()](#create-1)|[create()](#create-2)|[inEdgeBfs()](#inedgebfs)
+|[createExtend()](#createextend)|[alter()](#alter-1)|[getSchema()](#getschema)|[update()](#update)|[update()](#update-1) |[outEdgeBfs()](#outedgebfs)
+|[drop()](#drop)|[remove()](#remove-1)|[getDbInfo()](#getdbinfo)|[destroy()](#destroy)|[updateSrc()](#updatesrc)|[allEdgeBfs()](#alledgebfs)
+|[alter()](#alter)|[createIndex()](#createindex)||[get()](#get)|[updateDst()](#updatedst)|[inEdgeDfs()](#inedgedfs)
+||[dropIndex()](#dropindex)||[getInEdge()](#getinedge)|[destroy()](#destroy-1)|[outEdgeDfs()](#outedgedfs)
+||||[getOutEdge()](#getoutedge)|[get()](#get-1)|[allEdgeDfs()](#alledgedfs)
+||||[getAllEdge()](#getalledge)|[getSrc()](#getsrc)|[shortestPath()](#shortestpath)
+||||[getIndex()](#getindex)|[getDst()](#getdst)|
+|||||[getSrcDst()](#getsrcdst)|
+|||||[getIndex()](#getindex-1)|
+ 
 ## Database Context
 A database context must be initialized to create a connection to NogDB before calling any database operation. Noted that a particular database can be opened by only one process at a time and its database context needs to be treated as a singleton object in multi-thread programmings.
 
@@ -62,7 +98,7 @@ Database operations can be performed and controlled via a transaction. According
 // or	const txn = newTxn(ctx,'READ_ONLY');
 ```
 > - `txn` is Txn Object (Txn{})
-> - `ctx` - A  database context is `Context{}` type
+> - `ctx` - A  database context is [`Context{}`](#database-context) type
 > - `'READE_WRITE'` - A mode of txn refer to read-write txn
 > - `'READE_ONLY'` - A mode of txn refer to read-only txn
 
@@ -187,7 +223,7 @@ A comparable object in NogDB which is used to compare records with a defined con
 > - `condition` is Condition Object (Condition{})
 > - `propName` - A name of a property is `String `type
 
-### Functions of Record Object
+### Functions of Condition Object
 ```javascript
 // -- EQUAL: available for 'Number' and `String` types
 condition.eq(propValue);
@@ -222,23 +258,32 @@ condition.like(propPattern);
 condition.regex(propPattern);
 
 // -- IS NULL
-condition.null()
+condition.null();
+
+// -- IN: available for numeric and string types
+cobdition.in([propValue1,propValue2,...]);
+
+// -- BETWEEN: available for numeric and string types
+condition.between(propLowerBound, propUpperBound); // including all boundary values, {true, true} by default
+condition.between(propLowerBound, propUpperBound,false, true); // excluding lower bound value in the search result
+condition.between(propLowerBound, propUpperBound,true, false); // excluding upper bound value in the search result
+condition.between(propLowerBound, propUpperBound,false, false); // excluding all boundary values in the search result
 
 //Note that comparing string in a condition can apply ignoreCase() to perform case insensitive matching. By default, it is case sensitive.
 // -- CONTAIN -IgnoreCase
-condition.contain(propSubstring)
+condition.contain(propSubstring);
 condition.ignoreCase();
 // -- BEGIN WITH -IgnoreCase
-condition.beginWith(propSubstring)
+condition.beginWith(propSubstring);
 condition.ignoreCase();
 // -- END WITH -IgnoreCase
-condition.endWith(propSubstring)
+condition.endWith(propSubstring);
 condition.ignoreCase();
 // -- LIKE WITH -IgnoreCase
-condition.like(propPattern)
+condition.like(propPattern);
 condition.ignoreCase();
 // -- REGEX -IgnoreCase
-condition.regex(propPattern)
+condition.regex(propPattern);
 condition.ignoreCase();
 ```
 > - `propValue` is `Number` or `String` types
@@ -253,7 +298,7 @@ A class filtering is a set of class names which is internally represented as `st
 
 ```javascript
 // constructor
-	var classFilter = new nogdb.ClassFilter(["className1","className2, ..."]);
+	var classFilter = new nogdb.ClassFilter(["className1","className2", ...]);
 // or	var classFilter = nogdb.newClassFilter(["className1","className2, ..."]);
 ```
 > - `classFilter` is ClassFilter Object (ClassFilter{})
@@ -289,7 +334,7 @@ var size = classFilter.size();
 ```javascript
 var isEmpty = classFilter.empty();
 ```
-#### getClassName
+#### getClassName()
   - -- To retrieve names from all existing class in a classFilter.
   - It will return `properties` in `Array` type
 > properties - A array of existing class names.
@@ -314,7 +359,7 @@ var classNames = classFilter.getClassName();
 
    > - `Properties {}`
    >   - `key` is a name of property
-   >   - `value` is `PropertyDescriptor {}`
+   >   - `value` is [`PropertyDescriptor{}`](#propertydescriptor-)
    
 
 ### PropertyDescriptor {}
@@ -331,7 +376,7 @@ var classNames = classFilter.getClassName();
 
 | Key  | Value  | Meaning |
 | :------------ | :------------ | :------------ |
-| rid| `RecordId {}`| An object of record id|
+| rid| [`RecordId{}`](#recordid-)| An object of record id|
 
 ### Record {}
 
@@ -362,14 +407,14 @@ var classNames = classFilter.getClassName();
 | positionId | `Number` | An id of position |
 
 ### ResultSet
-> It is an `Array` of `Result {}`
+> It is an `Array` of [`Result{}`](#result-)
 
 ### Result {}
 
 | Key  | Value  | Meaning |
 | :------------ | :------------ | :------------ |
-| recordDescriptor|`RecordDescriptor {}`| An object of recordDescriptor|
-| record| `Record {}`| An object of record|
+| recordDescriptor|[`RecordDescriptor{}`](#recorddescriptor-)| An object of recordDescriptor|
+| record| [`Record{}`](#record-)| An object of record|
 
 ### DbInfo {}
 
@@ -399,14 +444,14 @@ var classDescriptor = nogdb.Class.create(txn,className,type);
    - To create a new class.
 
 - Parameters:
-   - `Txn{}` , txn - A database transaction.
+   - [`Txn{}`](#transaction) , txn - A database transaction.
 
    - `String` , className - A name of a class that will be created.
    
    - `String` , type - A type of a class. Note that there are two class types available, `'VERTEX'` and `'EDGE'`
    
 - Return:
-   - `ClassDescriptor {}` , classDescriptor - A class descriptor of a created class.
+   - [`ClassDescriptor{}`](#classdescriptor-), classDescriptor - A class descriptor of a created class.
    
 - Exceptions:
    - `CTX_INVALID_CLASSNAME` - A length of class name is zero.
@@ -426,14 +471,14 @@ var classDescriptor = nogdb.Class.createExtend(txn,className,superClassName);
    - To create a sub-class (aka. a derived class) of a super class (aka. a base class).
    
 - Parameters:
-   - `Txn{}` , txn - A database transaction.
+   - [`Txn{}`](#transaction) , txn - A database transaction.
 
    - `String` , className - A name of a sub-class that will be created.
 
    - `String` , superClassName - A name of a super class that will be derived from.
    
 - Return:
-   - `ClassDescriptor {}` , classDescriptor - A class descriptor of a created sub-class.
+   - [`ClassDescriptor{}`](#classdescriptor-), classDescriptor - A class descriptor of a created sub-class.
    
 - Exceptions:
 
@@ -451,7 +496,7 @@ nogdb.Class.drop(txn,className);
    - To drop a class.
    
 - Parameters:
-   - `Txn{}` , txn - A database transaction.
+   - [`Txn{}`](#transaction) , txn - A database transaction.
 
    - `String` , className - A name of a class that will be dropped.
    
@@ -469,7 +514,7 @@ nogdb.Class.alter(txn,oldClassName,newClassName);
    - To modify a class name.
    
 - Parameters:
-   - `Txn{}` , txn - A database transaction.
+   - [`Txn{}`](#transaction) , txn - A database transaction.
 
    - `String` , oldClassName - An old name of a class that will be changed from.
 
@@ -492,7 +537,7 @@ var propertyDescriptor = nogdb.Property.add(txn,className,propertyName,type);
    - To add a property to a class.
    
 - Parameters:
-   - `Txn{}` , txn - A database transaction.
+   - [`Txn{}`](#transaction) , txn - A database transaction.
 
    - `String` , className - A name of a class that a property will be added into.
 
@@ -531,7 +576,7 @@ var propertyDescriptor = nogdb.Property.add(txn,className,propertyName,type);
    >   - Range of Values = no boundary
 
 - Return:
-   - `PropertyDescriptor {}` , propertyDescriptor - A property descriptor of a created property.
+   - [`PropertyDescriptor {}](#propertydescriptor-), propertyDescriptor - A property descriptor of a created property.
    
 - Exceptions:
    - `CTX_INVALID_PROPERTYNAME` - A length of property name is zero.
@@ -554,7 +599,7 @@ nogdb.Property.alter(txn,className,oldPropertyName,newPropertyName);
    - To modify a property’s name.
    
 - Parameters:
-   - `Txn{}` , txn - A database transaction.
+   - [`Txn{}`](#transaction) , txn - A database transaction.
 
    - `String` , className - A name of a class to which a property currently belongs.
 
@@ -581,7 +626,7 @@ nogdb.Property.remove(txn,className,propertyName);
    - To delete a property.
    
 - Parameters:
-   - `Txn{}` , txn - A database transaction.
+   - [`Txn{}`](#transaction) , txn - A database transaction.
 
    - `String` , className - A name of a class to which a property currently belongs.
 
@@ -601,7 +646,7 @@ nogdb.Property.createIndex(txn,className,propertyName);					// isUnique = false
    - To create an index on a specified property.
    
 - Parameters:
-   - `Txn{}` , txn - A database transaction.
+   - [`Txn{}`](#transaction) , txn - A database transaction.
 
    - `String` , className - A name of a class to which a property currently belongs.
 
@@ -631,7 +676,7 @@ nogdb.Property.dropIndex(txn,className,propertyName);
    - To drop an index on a specified property.
    
 - Parameters:
-   - `Txn{}` , txn - A database transaction.
+   - [`Txn{}`](#transaction) , txn - A database transaction.
 
    - `String` , className - A name of a class to which a property currently belongs.
 
@@ -653,12 +698,12 @@ var record = nogdb.Db.getRecord(txn,recordDescriptor);
    - To get a record from a record descriptor.
    
 - Parameters:
-   - `Txn{}` , txn - A database transaction.
+   - [`Txn{}`](#transaction) , txn - A database transaction.
 
-   - `RecordDescriptor` , recordDescriptor - A record descriptor.
+   - [`RecordDescriptor{}`](#recorddescriptor-) , recordDescriptor - A record descriptor.
    
 - Return:
-   - `Record {}` , record - A record of a specified record descriptor.
+   - [`Record{}`](#record-) , record - A record of a specified record descriptor.
 
 - Exceptions:
    - `CTX_NOEXST_RECORD` - A record with the given descriptor does not exist.
@@ -677,12 +722,12 @@ var classDescriptor = nogdb.Db.getSchema(txn,classId);
 - Description:
    - To retrieve a schema information.
 
-   - **[Version 1] **return a read-only a array of schema `ClassDescriptor {}` for the whole classes in the database schema.
+   - **[Version 1] **return a read-only a array of schema [`ClassDescriptor{}`](#classdescriptor-)for the whole classes in the database schema.
 
-   - **[Version 2]** return a read-only `ClassDescriptor {}`
+   - **[Version 2]** return a read-only [`ClassDescriptor{}`](#classdescriptor-)
    
 - Parameters:
-   - `Txn{}` ,txn - A database transaction.
+   - [`Txn{}`](#transaction) ,txn - A database transaction.
 
    - `String` , className - A specified name of a class to be retrieved (only for version 2).
 
@@ -691,7 +736,7 @@ var classDescriptor = nogdb.Db.getSchema(txn,classId);
 - Return:
    - `[ClassDescriptor {},...]` , classDescriptors - An array of classes in the whole database schema.
 
-   - or `ClassDescriptor {}` , classDescriptor - A schema of a specified class.
+   - or [`ClassDescriptor{}`](#classdescriptor-), classDescriptor - A schema of a specified class.
    
 #### getDbInfo()
 ```javascript
@@ -701,10 +746,10 @@ var dbInfo = nogdb.Db.getDbInfo(txn);
    - To retrieve a database (metadata) information.
    
 - Parameters:
-   - `Txn{}` , txn - A database transaction.
+   - [`Txn{}`](#transaction) , txn - A database transaction.
    
 - Return:
-   - `DBInfo {}` , dbInfo - A database information
+   - [`DBInfo{}`](#dbinfo-) , dbInfo - A database information
    
 ### Vertex Operations
 #### create()
@@ -716,14 +761,14 @@ var recordDescriptor = nogdb.Vertex.create(txn,className);					// record is empt
    - To create a vertex.
    
 - Parameters:
-   - `Txn{}` , txn - A database transaction.
+   - [`Txn{}`](#transaction) , txn - A database transaction.
 
    - `String` , className - A name of a class.
 
-   - `Record{}` , record - A record object.
+   - [`Record{}`](#record) , record - A record object.
    
 - Return:
-   - `RecordDescriptor {}` , recordDescriptor - A record descriptor of a created vertex.
+   - [`RecordDescriptor{}`](#recorddescriptor-), recordDescriptor - A record descriptor of a created vertex.
    
 - Exceptions:
    - `CTX_NOEXST_CLASS` - A class does not exist.
@@ -744,11 +789,11 @@ nogdb.Vertex.update(txn,recordDescriptor,record);
    - To update a vertex.
    
 - Parameters:
-   - `Txn{}` , txn - A database transaction.
+   - [`Txn{}`](#transaction) , txn - A database transaction.
 
-   - `RecordDescriptor{}` , recordDescriptor - A record descriptor.
+   - [`RecordDescriptor{}`](#recorddescriptor-) , recordDescriptor - A record descriptor.
 
-   - `Record{}` , record - A new record object with modified properties and values.
+   - [`Record{}`](#record) , record - A new record object with modified properties and values.
    
 - Exceptions:
    - `CTX_NOEXST_CLASS` - A class does not exist.
@@ -770,9 +815,9 @@ nogdb.Vertex.destroy(txn,className);
    - To delete a vertex or all vertices in the same class. All associated edges will be deleted as well.
    
 - Parameters:
-   - `Txn{}` , txn - A database transaction.
+   - [`Txn{}`](#transaction) , txn - A database transaction.
 
-   - `RecordDescriptor{}` , recordDesciptor - A record descriptor.
+   - [`RecordDescriptor{}`](#recorddescriptor-) , recordDesciptor - A record descriptor.
 
    - `String` , className - A class name of vertices that will be entirely deleted.
 
@@ -794,14 +839,14 @@ var resultSet = nogdb.Vertex.get(txn,className,condition);
    - or To find vertices with a given condition.
    
 - Parameters:
-   - `Txn{}` , txn - A database transaction.
+   - [`Txn{}`](#transaction) , txn - A database transaction.
 
    - `String` , className - A class name of a vertex.
 
-   - `Condition{}` , condition - A condition that consists of a name of a property, a value, and a comparator used in searching for records.
+   - [`Condition{}`](#condition) , condition - A condition that consists of a name of a property, a value, and a comparator used in searching for records.
    
 - Return:
-   - `ResultSet` or `[Result{},..]` , resultSet - An array of results.
+   - [`ResultSet`](#resultset) or `[Result{},..]` , resultSet - An array of results.
    
 - Exceptions:
    - `CTX_NOEXST_CLASS` - A class does not exist.
@@ -829,16 +874,16 @@ var resultSet = nogdb.Vertex.getInEdge(txn,recordDescriptor,condition);
    - or To find edges with a given condition which are incoming edges of a vertex.
    
 - Parameters:
-   - `Txn{}` , txn - A database transaction.
+   - [`Txn{}`](#transaction) , txn - A database transaction.
 
-   - `RecordDescriptor{}` , recordDescriptor - a record descriptor of a vertex.
+   - [`RecordDescriptor{}`](#recorddescriptor-) , recordDescriptor - a record descriptor of a vertex.
 
-   - `Condition{}` , condition - A condition that consists of a name of a property, a value, and a comparator used in searching for records.
+   - [`Condition{}`](#condition) , condition - A condition that consists of a name of a property, a value, and a comparator used in searching for records.
 
-   - `ClassFilter` , classFilter - A class filtering. If this parameter is specified, only edges with a given class name (or class names) will be returned (optional).
+   - [`ClassFilter{}`](#classfilter) , classFilter - A class filtering. If this parameter is specified, only edges with a given class name (or class names) will be returned (optional).
    
 - Return:
-   - `ResultSet` or `[Result{},..]` , resultSet - An array of results.
+   - [`ResultSet`](#resultset) or `[Result{},..]` , resultSet - An array of results.
    
 - Exceptions:
    - `CTX_NOEXST_CLASS` - A class does not exist.
@@ -868,16 +913,16 @@ var resultSet = nogdb.Vertex.getOutEdge(txn,recordDescriptor,condition);
    - or To find edges with a given condition which are outgoing edges of a vertex.
 
 - Parameters:
-   - `Txn{}` , txn - A database transaction.
+   - [`Txn{}`](#transaction) , txn - A database transaction.
 
-   - `RecordDescriptor{}` , recordDescriptor - a record descriptor of a vertex.
+   - [`RecordDescriptor{}`](#recorddescriptor-) , recordDescriptor - a record descriptor of a vertex.
 
-   - `Condition{}` , condition - A condition that consists of a name of a property, a value, and a comparator used in searching for records.
+   - [`Condition{}`](#condition) , condition - A condition that consists of a name of a property, a value, and a comparator used in searching for records.
 
-   - `ClassFilter{}` , classFilter - A class filtering. If this parameter is specified, only edges with a given class name (or class names) will be returned (optional).
+   - [`ClassFilter{}`](#classfilter) , classFilter - A class filtering. If this parameter is specified, only edges with a given class name (or class names) will be returned (optional).
 
 - Return:
-   - `ResultSet` or `[Result{},..]` , resultSet - An array of results.
+   - [`ResultSet`](#resultset) or `[Result{},..]` , resultSet - An array of results.
 
 - Exceptions:
    - `CTX_NOEXST_CLASS` - A class does not exist.
@@ -907,16 +952,16 @@ var resultSet = nogdb.Vertex.getAllEdge(txn,recordDescriptor,condition);
    - or To find edges (both direction) that are associated with a vertex, and with a given condition.
 
 - Parameters:
-   - `Txn{}` , txn - A database transaction.
+   - [`Txn{}`](#transaction) , txn - A database transaction.
 
-   - `RecordDescriptor{}` , recordDescriptor - a record descriptor of a vertex.
+   - [`RecordDescriptor{}`](#recorddescriptor-) , recordDescriptor - a record descriptor of a vertex.
 
-   - `Condition{}` , condition - A condition that consists of a name of a property, a value, and a comparator used in searching for records.
+   - [`Condition{}`](#condition) , condition - A condition that consists of a name of a property, a value, and a comparator used in searching for records.
 
-   - `ClassFilter{}` , classFilter - A class filtering. If this parameter is specified, only edges with a given class name (or class names) will be returned (optional).
+   - [`ClassFilter{}`](#classfilter) , classFilter - A class filtering. If this parameter is specified, only edges with a given class name (or class names) will be returned (optional).
 
 - Return:
-   - `ResultSet` or `[Result{},..]` , resultSet - An array of results.
+   - [`ResultSet`](#resultset) or `[Result{},..]` , resultSet - An array of results.
 
 - Exceptions:
    - `CTX_NOEXST_CLASS` - A class does not exist.
@@ -936,14 +981,14 @@ var resultSet = nogdb.Vertex.getAllEdge(txn,recordDescriptor,condition);
 var resultSet = nogdb.Vertex.getIndex(txn,className,condition);
 ```
 - Parameters:
-   - `Txn{}` , txn - A database transaction.
+   - [`Txn{}`](#transaction) , txn - A database transaction.
 
    - `String` , className - A class name as std::string of an edge.
 
-   - `Condition{}` , condition - A condition that consists of a name of a property, a value, and a comparator used in searching for records.
+   - [`Condition{}`](#condition) , condition - A condition that consists of a name of a property, a value, and a comparator used in searching for records.
    
 - Return:
-   - `ResultSet` or `[Result{},..]` , resultSet - An array of results.
+   - [`ResultSet`](#resultset) or `[Result{},..]` , resultSet - An array of results.
 
 ### Edge Operations
 #### create()
@@ -955,18 +1000,18 @@ var recordDescriptor = nogdb.Edge.create(txn,className,srcVertexRecordDescriptor
    - To create an edge.
    
 - Parameters:
-   - `Txn{}` , txn - A database transaction.
+   - [`Txn{}`](#transaction) , txn - A database transaction.
    
    - `String` , className - A name of a class.
 
-   - `RecordDescriptor{}` , srcVertexRecordDescriptor - A record descriptor of a source vertex.
+   - [`RecordDescriptor{}`](#recorddescriptor-) , srcVertexRecordDescriptor - A record descriptor of a source vertex.
 
-   - `RecordDescriptor{}` , dstVertexRecordDescriptor - A record descriptor of a destinaton vertex.
+   - [`RecordDescriptor{}`](#recorddescriptor-) , dstVertexRecordDescriptor - A record descriptor of a destinaton vertex.
 
-   - `Record{}` , record - A record object as nogdb::Record (can be empty if not specified).
+   - [`Record{}`](#record) , record - A record object as nogdb::Record (can be empty if not specified).
    
 - Return:
-   - `RecordDescriptor{}` , recordDescriptor - A record descriptor of a created edge.
+   - [`RecordDescriptor{}`](#recorddescriptor-) , recordDescriptor - A record descriptor of a created edge.
 
 - Exceptions:
    - `CTX_NOEXST_CLASS` - A class does not exist.
@@ -989,11 +1034,11 @@ nogdb.Edge.update(txn,recordDescriptor,record);
    - To update an edge.
    
 - Parameters:
-   - `Txn{}` , txn - A database transaction.
+   - [`Txn{}`](#transaction) , txn - A database transaction.
 
    - `RecordDescriptor` , recordDescriptor - A record descriptor.
 
-   - `Record{}` , record - A new record object with modified properties and values.
+   - [`Record{}`](#record) , record - A new record object with modified properties and values.
    
 - Exceptions:
    - `CTX_NOEXST_CLASS` - A class does not exist.
@@ -1014,11 +1059,11 @@ nogdb.Edge.updateSrc(txn,recordDescriptor,srcVertexRecordDescriptor);
    - To update a source vertex of an edge.
    
 - Parameters:
-   - `Txn{}` , txn - A database transaction.
+   - [`Txn{}`](#transaction) , txn - A database transaction.
 
-   - `RecordDescriptor{}` , recordDescriptor - A record descriptor of an edge itself.
+   - [`RecordDescriptor{}`](#recorddescriptor-) , recordDescriptor - A record descriptor of an edge itself.
 
-   - `RecordDescriptor{}` , newSrcVertexRecordDescriptor - A record descriptor of a new source vertex.
+   - [`RecordDescriptor{}`](#recorddescriptor-) , newSrcVertexRecordDescriptor - A record descriptor of a new source vertex.
    
 - Exceptions:
    - `CTX_NOEXST_CLASS` - A class does not exist.
@@ -1037,11 +1082,11 @@ nogdb.Edge.updateDst(txn,recordDescriptor,dstVertexRecordDescriptor);
    - To update a destination vertex of an edge.
    
 - Parameters:
-   - `Txn{}` , txn - A database transaction.
+   - [`Txn{}`](#transaction) , txn - A database transaction.
 
-   - `RecordDesriptor{}` , recordDescriptor - A record descriptor of an edge itself.
+   - [`RecordDescriptor{}`](#recorddescriptor-) , recordDescriptor - A record descriptor of an edge itself.
 
-   - `RecordDescriptor{}` , newDstVertexRecordDescriptor - A record descriptor of a new destination vertex.
+   - [`RecordDescriptor{}`](#recorddescriptor-) , newDstVertexRecordDescriptor - A record descriptor of a new destination vertex.
    
 - Exceptions:
    - `CTX_NOEXST_CLASS` - A class does not exist.
@@ -1061,9 +1106,9 @@ nogdb.Edge.destroy(txn,className);
    - To delete an edge or all edges in the same class.
    
 - Parameters:
-   - `Txn{}` , txn - A database transaction.
+   - [`Txn{}`](#transaction) , txn - A database transaction.
 
-   - `RecordDescriptor{}` , recordDescriptor - A record descriptor.
+   - [`RecordDescriptor{}`](#recorddescriptor-) , recordDescriptor - A record descriptor.
 
    - `String` , className - A class name of edges that will be entirely deleted.
    
@@ -1085,14 +1130,14 @@ var resultSet = nogdb.Edge.get(txn,className,condition);
    - or To find edges with a given condition.
    
 - Parameters:
-   - `Txn{}` , txn - A database transaction.
+   - [`Txn{}`](#transaction) , txn - A database transaction.
 
    - `String` , className - A class name as std::string of an edge.
 
-   - `Condition{}` , condition - A condition that consists of a name of a property, a value, and a comparator used in searching for records.
+   - [`Condition{}`](#condition) , condition - A condition that consists of a name of a property, a value, and a comparator used in searching for records.
    
 - Return:
-   - `ResultSet` or `[Result{},..]` , resultSet - An array of results.
+   - [`ResultSet`](#resultset) or `[Result{},..]` , resultSet - An array of results.
    
 - Exceptions:
    - `CTX_NOEXST_CLASS` - A class does not exist.
@@ -1112,12 +1157,12 @@ var result = nogdb.Edge.getSrc(txn,recordDescriptor);
 - Description:
    - To find a vertex which is a source node of an out-edge.
 - Parameters:
-   - `Txn{}` , txn - A database transaction.
+   - [`Txn{}`](#transaction) , txn - A database transaction.
 
-   - `RecordDescriptor{}` , recordDescriptor - A record descriptor of an out-edge.
+   - [`RecordDescriptor{}`](#recorddescriptor-) , recordDescriptor - A record descriptor of an out-edge.
 
 - Return:
-   - `Result{}` , result - A result of record descriptor and record.
+   - [Result{}](#result-) , result - A result of record descriptor and record.
 
 - Exceptions:
    - `CTX_NOEXST_CLASS` - A class does not exist.
@@ -1133,11 +1178,11 @@ var result = nogdb.Edge.getDst(txn,recordDescriptor);
    - To find a vertex which is a destination node of an in-edge.
    
 - Parameters:
-   - `Txn{}` , txn - A database transaction.
+   - [`Txn{}`](#transaction) , txn - A database transaction.
 
-   - `RecordDescriptor{}` , recordDescriptor - A record descriptor of an out-edge.
+   - [`RecordDescriptor{}`](#recorddescriptor-) , recordDescriptor - A record descriptor of an out-edge.
 - Return:
-   - `Result{}` , result - A result of record descriptor and record.
+   - [Result{}](#result-) , result - A result of record descriptor and record.
 
 - Exceptions:
    - `CTX_NOEXST_CLASS` - A class does not exist.
@@ -1154,12 +1199,12 @@ var resultSet = nogdb.Edge.getSrcDst(txn,recordDescriptor);
    - To find both source and destication vertices which is associated with an interesting edge.
    
 - Parameters:
-   - `Txn{}` , txn - A database transaction.
+   - [`Txn{}`](#transaction) , txn - A database transaction.
 
-   - `RecordDescriptor{}` , recordDescriptor - A record descriptor of an interesting edge.
+   - [`RecordDescriptor{}`](#recorddescriptor-) , recordDescriptor - A record descriptor of an interesting edge.
    
 - Return:
-   - `ResultSet` or `[Result{},..]` , resultSet - An array of results including source and destination vertices.
+   - [`ResultSet`](#resultset) or `[Result{},..]` , resultSet - An array of results including source and destination vertices.
    
 - Exceptions:
    - `CTX_NOEXST_CLASS` - A class does not exist.
@@ -1173,14 +1218,14 @@ var resultSet = nogdb.Edge.getSrcDst(txn,recordDescriptor);
 var resultSet = nogdb.Edge.getIndex(txn,className,condition);
 ```
 - Parameters:
-   - `Txn{}` , txn - A database transaction.
+   - [`Txn{}`](#transaction) , txn - A database transaction.
 
    - `String` , className - A class name as std::string of an edge.
 
-   - `Condition{}` , condition - A condition that consists of a name of a property, a value, and a comparator used in searching for records.
+   - [`Condition{}`](#condition) , condition - A condition that consists of a name of a property, a value, and a comparator used in searching for records.
    
 - Return:
-   - `ResultSet` or `[Result{},..]` , resultSet - An array of results.
+   - [`ResultSet`](#resultset) or `[Result{},..]` , resultSet - An array of results.
 
 ### Traverse (Graph) Operations
 #### inEdgeBfs()
@@ -1191,18 +1236,18 @@ var resultSet = nogdb.Traverse.inEdgeBfs(txn,recordDescriptor,minDepth,maxDepth)
 - Description:
    - To find vertices as a result of in-edges graph traversal (BFS) starting from a specific vertex to other vertices.
 - Parameters:
-   - `Txn{}` , txn - A database transaction.
+   - [`Txn{}`](#transaction) , txn - A database transaction.
 
-   - `RecordDescriptor{}` , recordDescriptor - A record descriptor of a vertex.
+   - [`RecordDescriptor{}`](#recorddescriptor-) , recordDescriptor - A record descriptor of a vertex.
 
    - `Number` , minDepth - A minimum level of graph traversal.
 
    - `Number` , maxDepth - A maximum level of graph traversal.
 
-   - `String` , classFilter - A class filtering. If this parameter is specified, only edges with a given class name (or class names) will be returned (optional).
+   - [`ClassFilter{}`](#classfilter) , classFilter - A class filtering. If this parameter is specified, only edges with a given class name (or class names) will be returned (optional).
 	
 - Return:
-   - `ResultSet` or `[Result{},..]` , resultSet - An array of results.
+   - [`ResultSet`](#resultset) or `[Result{},..]` , resultSet - An array of results.
    
 - Exceptions:
    - `CTX_NOEXST_CLASS` - A class does not exist.
@@ -1220,18 +1265,18 @@ var resultSet = nogdb.Traverse.outEdgeBfs(txn,recordDescriptor,minDepth,maxDepth
    - To find vertices as a result of out-edges graph traversal (BFS) starting from a specific vertex to other vertices.
    
 - Parameters:
-   - `Txn{}` , txn - A database transaction.
+   - [`Txn{}`](#transaction) , txn - A database transaction.
 
-   - `RecordDescriptor{}` , recordDescriptor - A record descriptor of a vertex.
+   - [`RecordDescriptor{}`](#recorddescriptor-) , recordDescriptor - A record descriptor of a vertex.
 
    - `Number` , minDepth - A minimum level of graph traversal.
 
    - `Number` , maxDepth - A maximum level of graph traversal.
 
-   - `String` , classFilter - A class filtering. If this parameter is specified, only edges with a given class name (or class names) will be returned (optional).
+   - [`ClassFilter{}`](#classfilter) , classFilter - A class filtering. If this parameter is specified, only edges with a given class name (or class names) will be returned (optional).
 	
 - Return:
-   - `ResultSet` or `[Result{},..]` , resultSet - An array of results.
+   - [`ResultSet`](#resultset) or `[Result{},..]` , resultSet - An array of results.
    
 - Exceptions:
    - `CTX_NOEXST_CLASS` - A class does not exist.
@@ -1249,18 +1294,18 @@ var resultSet = nogdb.Traverse.allEdgeBfs(txn,recordDescriptor,minDepth,maxDepth
    - To find vertices as a result of in- and out-edges graph traversal (BFS) starting from a specific vertex to other vertices.
    
 - Parameters:
-   - `Txn{}` , txn - A database transaction.
+   - [`Txn{}`](#transaction) , txn - A database transaction.
 
-   - `RecordDescriptor{}` , recordDescriptor - A record descriptor of a vertex.
+   - [`RecordDescriptor{}`](#recorddescriptor-) , recordDescriptor - A record descriptor of a vertex.
 
    - `Number` , minDepth - A minimum level of graph traversal.
 
    - `Number` , maxDepth - A maximum level of graph traversal.
 
-   - `String` , classFilter - A class filtering. If this parameter is specified, only edges with a given class name (or class names) will be returned (optional).
+   - [`ClassFilter{}`](#classfilter) , classFilter - A class filtering. If this parameter is specified, only edges with a given class name (or class names) will be returned (optional).
 	
 - Return:
-   - `ResultSet` or `[Result{},..]` , resultSet - An array of results.
+   - [`ResultSet`](#resultset) or `[Result{},..]` , resultSet - An array of results.
    
 - Exceptions:
    - `CTX_NOEXST_CLASS` - A class does not exist.
@@ -1278,18 +1323,18 @@ var resultSet = nogdb.Traverse.inEdgeDfs(txn,recordDescriptor,minDepth,maxDepth)
    - To find vertices as a result of in-edges graph traversal (DFS) starting from a specific vertex to other vertices.
    
 - Parameters:
-   - `Txn{}` , txn - A database transaction.
+   - [`Txn{}`](#transaction) , txn - A database transaction.
 
-   - `RecordDescriptor{}` , recordDescriptor - A record descriptor of a vertex.
+   - [`RecordDescriptor{}`](#recorddescriptor-) , recordDescriptor - A record descriptor of a vertex.
 
    - `Number` , minDepth - A minimum level of graph traversal.
 
    - `Number` , maxDepth - A maximum level of graph traversal.
 
-   - `String` , classFilter - A class filtering. If this parameter is specified, only edges with a given class name (or class names) will be returned (optional).
+   - [`ClassFilter{}`](#classfilter) , classFilter - A class filtering. If this parameter is specified, only edges with a given class name (or class names) will be returned (optional).
 	
 - Return:
-   - `ResultSet` or `[Result{},..]` , resultSet - An array of results.
+   - [`ResultSet`](#resultset) or `[Result{},..]` , resultSet - An array of results.
    
 - Exceptions:
    - `CTX_NOEXST_CLASS` - A class does not exist.
@@ -1307,18 +1352,18 @@ var resultSet = nogdb.Traverse.outEdgeDfs(txn,recordDescriptor,minDepth,maxDepth
    - To find vertices as a result of out-edges graph traversal (DFS) starting from a specific vertex to other vertices.
    
 - Parameters:
-   - `Txn{}` , txn - A database transaction.
+   - [`Txn{}`](#transaction) , txn - A database transaction.
 
-   - `RecordDescriptor{}` , recordDescriptor - A record descriptor of a vertex.
+   - [`RecordDescriptor{}`](#recorddescriptor-) , recordDescriptor - A record descriptor of a vertex.
 
    - `Number` , minDepth - A minimum level of graph traversal.
 
    - `Number` , maxDepth - A maximum level of graph traversal.
 
-   - `String` , classFilter - A class filtering. If this parameter is specified, only edges with a given class name (or class names) will be returned (optional).
+   - [`ClassFilter{}`](#classfilter) , classFilter - A class filtering. If this parameter is specified, only edges with a given class name (or class names) will be returned (optional).
 	
 - Return:
-   - `ResultSet` or `[Result{},..]` , resultSet - An array of results.
+   - [`ResultSet`](#resultset) or `[Result{},..]` , resultSet - An array of results.
    
 - Exceptions:
    - `CTX_NOEXST_CLASS` - A class does not exist.
@@ -1336,18 +1381,18 @@ var resultSet = nogdb.Traverse.allEdgeDfs(txn,recordDescriptor,minDepth,maxDepth
    - To find vertices as a result of in- and out-edges graph traversal (DFS) starting from a specific vertex to other vertices.
    
 - Parameters:
-   - `Txn{}` , txn - A database transaction.
+   - [`Txn{}`](#transaction) , txn - A database transaction.
 
-   - `RecordDescriptor{}` , recordDescriptor - A record descriptor of a vertex.
+   - [`RecordDescriptor{}`](#recorddescriptor-) , recordDescriptor - A record descriptor of a vertex.
 
    - `Number` , minDepth - A minimum level of graph traversal.
 
    - `Number` , maxDepth - A maximum level of graph traversal.
 
-   - `String` , classFilter - A class filtering. If this parameter is specified, only edges with a given class name (or class names) will be returned (optional).
+   - [`ClassFilter{}`](#classfilter) , classFilter - A class filtering. If this parameter is specified, only edges with a given class name (or class names) will be returned (optional).
 
 - Return:
-   - `ResultSet` or `[Result{},..]` , resultSet - An array of results.
+   - [`ResultSet`](#resultset) or `[Result{},..]` , resultSet - An array of results.
    
 - Exceptions:
    - `CTX_NOEXST_CLASS` - A class does not exist.
@@ -1365,16 +1410,16 @@ var resultSet = nogdb.Traverse.shortestPath(txn,srcVertexRecordDescriptor,dstVer
    - To find all vertices in the shortest path (BFS) from a source vertex to a destination vertex.
    
 - Parameters:
-   - `Txn{}` , txn - A database transaction.
+   - [`Txn{}`](#transaction) , txn - A database transaction.
 
-   -`RecordDescriptor{}` , srcVertexRecordDescriptor - A record descriptor of a source vertex.
+   -[`RecordDescriptor{}`](#recorddescriptor-) , srcVertexRecordDescriptor - A record descriptor of a source vertex.
 
-   - `RecordDescriptor{}` , dstVertexRecordDescriptor - A record descriptor of a destination vertex.
+   - [`RecordDescriptor{}`](#recorddescriptor-) , dstVertexRecordDescriptor - A record descriptor of a destination vertex.
 
-   - `ClassFilter{}` , classFilter - A class filtering. If this parameter is specified, only edges with a given class name (or class names) will be returned (optional).
+   - [`ClassFilter{}`](#classfilter) , classFilter - A class filtering. If this parameter is specified, only edges with a given class name (or class names) will be returned (optional).
 
 - Return:
-   - `ResultSet` or `[Result{},..]` , resultSet - An array of results.
+   - [`ResultSet`](#resultset) or `[Result{},..]` , resultSet - An array of results.
    
 - Exceptions:
    - `CTX_NOEXST_CLASS` - A class does not exist.

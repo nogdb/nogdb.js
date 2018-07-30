@@ -27,7 +27,8 @@ NAN_MODULE_INIT(Condition::Init)
     Nan::SetPrototypeMethod(constructTemplate, "regex", Condition::regex);
     Nan::SetPrototypeMethod(constructTemplate, "ignoreCase", Condition::ignoreCase);
     Nan::SetPrototypeMethod(constructTemplate, "null", Condition::null);
-    
+    Nan::SetPrototypeMethod(constructTemplate, "in", Condition::in);
+    Nan::SetPrototypeMethod(constructTemplate, "between", Condition::between);
 
     target->Set(Nan::New("Condition").ToLocalChecked(), constructTemplate->GetFunction());
 }
@@ -290,6 +291,118 @@ NAN_METHOD(Condition::ignoreCase) {
         info.GetReturnValue().SetUndefined();        
     } catch ( nogdb::Error& err ) {
         Nan::ThrowError(err.what());
+    }
+}
+
+NAN_METHOD(Condition::in) {
+    Condition *cond = Nan::ObjectWrap::Unwrap<Condition>(info.This());
+    if (info.Length() == 1 && info[0]->IsArray())
+    {
+        v8::Local<v8::Array> array = v8::Local<v8::Array>::Cast(info[0]);
+        if(Nan::Get(array, 0).ToLocalChecked()->IsString()){
+            std::set<std::string> propValues;
+            for (unsigned int i = 0; i < array->Length(); i++ ) {
+                if (Nan::Has(array, i).FromJust()) {
+                    if(Nan::Get(array, i).ToLocalChecked()->IsString()){
+                        propValues.insert(*Nan::Utf8String(Nan::Get(array, i).ToLocalChecked()->ToString()));
+                    } 
+                    else 
+                    {
+                        Nan::ThrowError("value type error");
+                        return;
+                    }
+                }
+            }
+            try {
+                cond->base = cond->base.in(propValues);
+                info.GetReturnValue().SetUndefined();        
+            } catch ( nogdb::Error& err ) {
+                Nan::ThrowError(err.what());
+            }
+        } 
+        else if(Nan::Get(array, 0).ToLocalChecked()->IsNumber()){
+            std::set<double> propValues;
+            for (unsigned int i = 0; i < array->Length(); i++ ) {
+                if (Nan::Has(array, i).FromJust()) {
+                    if(Nan::Get(array, i).ToLocalChecked()->IsNumber()){
+                        propValues.insert(Nan::Get(array, i).ToLocalChecked()->NumberValue());
+                    } else
+                    {
+                        Nan::ThrowError("value type error");
+                        return;
+                    }
+                }
+            }
+            try {
+                cond->base = cond->base.in(propValues);
+                info.GetReturnValue().SetUndefined();        
+            } catch ( nogdb::Error& err ) {
+                Nan::ThrowError(err.what());
+            }
+        }
+        else
+        {
+            Nan::ThrowError("value type error");
+            return;
+        }
+    }
+    else
+    {
+        return Nan::ThrowError(Nan::New("Condition.in() - invalid arugment(s)").ToLocalChecked());
+    }
+}
+
+NAN_METHOD(Condition::between) {
+    Condition *cond = Nan::ObjectWrap::Unwrap<Condition>(info.This());
+    if (info.Length() == 2 && info[0]->IsString() && info[1]->IsString())
+    {
+        std::string lower = *Nan::Utf8String(info[0]->ToString());
+        std::string upper = *Nan::Utf8String(info[1]->ToString());
+        try {
+            cond->base = cond->base.between(lower,upper);
+            info.GetReturnValue().SetUndefined();    
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        } 
+    } 
+    else if (info.Length() == 2 && info[0]->IsNumber() && info[1]->IsNumber())
+    {
+        double lower = info[0]->NumberValue();
+        double upper = info[1]->NumberValue();
+        try {
+            cond->base = cond->base.between(lower,upper);
+            info.GetReturnValue().SetUndefined();    
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        } 
+    } 
+    else if (info.Length() == 4 && info[0]->IsString() && info[1]->IsString() && info[2]->IsBoolean() && info[3]->IsBoolean())
+    {
+        std::string lower = *Nan::Utf8String(info[0]->ToString());
+        std::string upper = *Nan::Utf8String(info[1]->ToString());
+        std::pair<bool, bool> isIncludeBound = {info[2]->BooleanValue(),info[3]->BooleanValue()};
+        try {
+            cond->base = cond->base.between(lower,upper,isIncludeBound);
+            info.GetReturnValue().SetUndefined();    
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        } 
+    } 
+    else if (info.Length() == 4 && info[0]->IsNumber() && info[1]->IsNumber() && info[2]->IsBoolean() && info[3]->IsBoolean())
+    {
+        double lower = info[0]->NumberValue();
+        double upper = info[1]->NumberValue();
+        std::pair<bool, bool> isIncludeBound = {info[2]->BooleanValue(),info[3]->BooleanValue()};
+        try {
+            cond->base = cond->base.between(lower,upper,isIncludeBound);
+            info.GetReturnValue().SetUndefined();    
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        } 
+    } 
+    else
+    {
+        return Nan::ThrowError(Nan::New("Condition.between() - invalid arugment(s)").ToLocalChecked());
     }
 }
 
