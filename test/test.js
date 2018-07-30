@@ -454,42 +454,105 @@ describe('nogdb.js', function() {
             it('should be pass when valid arugment', function() {
                 let txn = new nogdb.Txn(ctx,"READ_ONLY");
                 let condition = new nogdb.Condition('name');
-                condition.eq('H');
-                let H = nogdb.Vertex.get(txn,'folders',condition)[0].recordDescriptor;
+                condition.eq('f');
+                let f = nogdb.Vertex.get(txn,'files',condition)[0].recordDescriptor;
                 let classF = new nogdb.ClassFilter(["link"]);
-                let res = nogdb.Traverse.inEdgeBfs(txn,H,1,10,classF);
-                console.log(res.length);
-                
+                let res = nogdb.Traverse.inEdgeBfs(txn,f,1,4,classF);
+                assert.equal(5,res.length);
+                assert.equal('G',res[0].record.value.name.toText);
+                assert.equal(1,res[0].record.depth);
+                assert.equal('C',res[1].record.value.name.toText);
+                assert.equal(1,res[1].record.depth);
+                assert.equal('E',res[2].record.value.name.toText);
+                assert.equal(2,res[2].record.depth);
+                assert.equal('A',res[3].record.value.name.toText);
+                assert.equal(2,res[3].record.depth);
+                assert.equal('B',res[4].record.value.name.toText);
+                assert.equal(3,res[4].record.depth);
             });
         });
         describe('OutEdge Bfs...' , function() {
             it('should be pass when valid arugment', function() {
-
+                let txn = new nogdb.Txn(ctx,"READ_ONLY");
+                let condition = new nogdb.Condition('name');
+                condition.eq('A');
+                let A = nogdb.Vertex.get(txn,'folders',condition)[0].recordDescriptor;
+                let classF = new nogdb.ClassFilter(["link"]);
+                let res = nogdb.Traverse.outEdgeBfs(txn,A,1,1,classF);
+                assert.equal(3,res.length);
             });
         });
         describe('AllEdge Bfs...' , function() {
             it('should be pass when valid arugment', function() {
-
+                let txn = new nogdb.Txn(ctx,"READ_ONLY");
+                let condition = new nogdb.Condition('name');
+                condition.eq('B');
+                let B = nogdb.Vertex.get(txn,'folders',condition)[0].recordDescriptor;
+                let classF = new nogdb.ClassFilter(["link"]);
+                let res = nogdb.Traverse.allEdgeBfs(txn,B,1,1,classF);
+                assert.equal(4,res.length);
             });
         });
         describe('InEdge Dfs...' , function() {
             it('should be pass when valid arugment', function() {
-
+                let txn = new nogdb.Txn(ctx,"READ_ONLY");
+                let condition = new nogdb.Condition('name');
+                condition.eq('f');
+                let f = nogdb.Vertex.get(txn,'files',condition)[0].recordDescriptor;
+                let classF = new nogdb.ClassFilter(["link"]);
+                let res = nogdb.Traverse.inEdgeDfs(txn,f,1,4,classF);
+                assert.equal(5,res.length);
+                assert.equal('G',res[0].record.value.name.toText);
+                assert.equal(1,res[0].record.depth);
+                assert.equal('E',res[1].record.value.name.toText);
+                assert.equal(2,res[1].record.depth);
+                assert.equal('B',res[2].record.value.name.toText);
+                assert.equal(3,res[2].record.depth);
+                assert.equal('A',res[3].record.value.name.toText);
+                assert.equal(4,res[3].record.depth);
+                assert.equal('C',res[4].record.value.name.toText);
+                assert.equal(1,res[4].record.depth);
             });
         });
         describe('OutEdge Dfs...' , function() {
             it('should be pass when valid arugment', function() {
-
+                let txn = new nogdb.Txn(ctx,"READ_ONLY");
+                let condition = new nogdb.Condition('name');
+                condition.eq('A');
+                let A = nogdb.Vertex.get(txn,'folders',condition)[0].recordDescriptor;
+                let classF = new nogdb.ClassFilter(["link"]);
+                let res = nogdb.Traverse.outEdgeDfs(txn,A,1,1,classF);
+                assert.equal(3,res.length);
             });
         });
         describe('AllEdge Dfs...' , function() {
             it('should be pass when valid arugment', function() {
-
+                let txn = new nogdb.Txn(ctx,"READ_ONLY");
+                let condition = new nogdb.Condition('name');
+                condition.eq('B');
+                let B = nogdb.Vertex.get(txn,'folders',condition)[0].recordDescriptor;
+                let classF = new nogdb.ClassFilter(["link"]);
+                let res = nogdb.Traverse.allEdgeDfs(txn,B,1,1,classF);
+                assert.equal(4,res.length);
             });
         });
         describe('Shortest path...' , function() {
             it('should be pass when valid arugment', function() {
-
+                let txn = new nogdb.Txn(ctx,"READ_ONLY");
+                let condition = new nogdb.Condition('name');
+                condition.eq('f');
+                let f = nogdb.Vertex.get(txn,'files',condition)[0].recordDescriptor;
+                let condition2 = new nogdb.Condition('name');
+                condition2.eq('A');
+                let A = nogdb.Vertex.get(txn,'folders',condition2)[0].recordDescriptor;
+                let res = nogdb.Traverse.shortestPath(txn,A,f);
+                assert.equal(3,res.length);
+                assert.equal('A',res[0].record.value.name.toText);
+                assert.equal(0,res[0].record.depth);
+                assert.equal('C',res[1].record.value.name.toText);
+                assert.equal(1,res[1].record.depth);
+                assert.equal('f',res[2].record.value.name.toText);
+                assert.equal(2,res[2].record.depth);
             });
         });
     });
