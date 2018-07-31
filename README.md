@@ -40,7 +40,7 @@ var txn = new nogdb.Txn(ctx,"READ_WRITE");
 
 - **Fourth step** you can use [Database operations](https://github.com/nogdb/nogdb.js/blob/master/doc.md#nogdbjs-operations) .
 
- - `Class` Operations from [nogdb.Class](https://github.com/nogdb/nogdb.js/blob/master/doc.md#class-operations "nogdb.Class")
+   - `Class` Operations from [nogdb.Class](https://github.com/nogdb/nogdb.js/blob/master/doc.md#class-operations "nogdb.Class")
 
    - `Property` Operations from [nogdb.Property](https://github.com/nogdb/nogdb.js/blob/master/doc.md#property-operations "nogdb.Property")
 
