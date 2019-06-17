@@ -14,10 +14,9 @@ NAN_MODULE_INIT(Context::Init)
     constructTemplate->InstanceTemplate()->SetInternalFieldCount(1);
     constructTemplate->SetClassName(Nan::New("Context").ToLocalChecked());
 
-    Nan::SetPrototypeMethod(constructTemplate, "getMaxDb", Context::getMaxDb);
-    Nan::SetPrototypeMethod(constructTemplate, "getMaxDbSize", Context::getMaxDbSize);
-    Nan::SetPrototypeMethod(constructTemplate, "getDbPath", Context::getDbPath);
-    Nan::SetPrototypeMethod(constructTemplate, "isVersionEnabled", Context::isVersionEnabled);
+    Nan::SetPrototypeMethod(constructTemplate, "getMaxVersionId", Context::getMaxVersionId);
+    Nan::SetPrototypeMethod(constructTemplate, "getMaxTxnId", Context::getMaxTxnId);
+    Nan::SetPrototypeMethod(constructTemplate, "getMinActiveTxnId", Context::getMinActiveTxnId);
 
     target->Set(Nan::New("Context").ToLocalChecked(), constructTemplate->GetFunction());
 }
@@ -43,41 +42,34 @@ NAN_METHOD(Context::New)
     }
 }
 
-NAN_METHOD(Context::getMaxDb) {
+NAN_METHOD(Context::getMaxVersionId) {
     Context *ctx = Nan::ObjectWrap::Unwrap<Context>(info.This());
     try {
-        int maxDb =  ctx->base.getMaxDb();
-        info.GetReturnValue().Set(maxDb);    
+        int maxVerId =  ctx->base.getMaxVersionId();
+        info.GetReturnValue().Set(maxVerId);    
     } catch ( nogdb::Error& err ) {
         Nan::ThrowError(err.what());
     }
 }
 
-NAN_METHOD(Context::getMaxDbSize) {
+NAN_METHOD(Context::getMaxTxnId) {
     Context *ctx = Nan::ObjectWrap::Unwrap<Context>(info.This());
     try {
-        int maxDbSize =  ctx->base.getMaxDbSize();
-        info.GetReturnValue().Set(maxDbSize);    
+        int maxTxnId =  ctx->base.getMaxTxnId();
+        info.GetReturnValue().Set(maxTxnId);    
     } catch ( nogdb::Error& err ) {
         Nan::ThrowError(err.what());
     }
 }
 
-NAN_METHOD(Context::getDbPath) {
+NAN_METHOD(Context::getMinActiveTxnId) {
     Context *ctx = Nan::ObjectWrap::Unwrap<Context>(info.This());
     try {
-        std::string dbPath =  ctx->base.getDbPath();
-        info.GetReturnValue().Set(Nan::New<v8::String>(dbPath).ToLocalChecked());    
-    } catch ( nogdb::Error& err ) {
-        Nan::ThrowError(err.what());
-    }
-}
-
-NAN_METHOD(Context::isVersionEnabled) {
-    Context *ctx = Nan::ObjectWrap::Unwrap<Context>(info.This());
-    try {
-        bool enabled =  ctx->base.isVersionEnabled();
-        info.GetReturnValue().Set(enabled);    
+        std::pair<int, int> minActiveTxnId = ctx->base.getMinActiveTxnId();
+        v8::Local<v8::Object> retval = Nan::New<v8::Object>();
+        Nan::Set(retval, Nan::New<v8::String>("first").ToLocalChecked(), Nan::New<v8::Number>(minActiveTxnId.first));
+        Nan::Set(retval, Nan::New<v8::String>("second").ToLocalChecked(), Nan::New<v8::Number>(minActiveTxnId.second));
+        info.GetReturnValue().Set(retval);    
     } catch ( nogdb::Error& err ) {
         Nan::ThrowError(err.what());
     }

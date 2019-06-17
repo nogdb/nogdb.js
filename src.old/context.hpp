@@ -14,8 +14,7 @@ private:
     explicit Context(const std::string &path) : base(path) {} ;
 
     static NAN_METHOD(New);
-    static NAN_METHOD(getDbPath);
-    static NAN_METHOD(getMaxDb);
-    static NAN_METHOD(getMaxDbSize);
-    static NAN_METHOD(isVersionEnabled);
+    static NAN_METHOD(getMaxVersionId) ;
+    static NAN_METHOD(getMaxTxnId) ;
+    static NAN_METHOD(getMinActiveTxnId) ;
 };

@@ -1,3 +1,4 @@
+#include <iostream>
 #include <nan.h>
 #include <nogdb/nogdb.h>
 
@@ -7,6 +8,7 @@ v8::Local<v8::Value> v8ClassDescriptor(nogdb::ClassDescriptor classD){
     v8::Local<v8::Object> retval = Nan::New<v8::Object>();
     Nan::Set(retval, Nan::New<v8::String>("id").ToLocalChecked(), Nan::New<v8::Uint32>(classD.id));
     Nan::Set(retval, Nan::New<v8::String>("name").ToLocalChecked(), Nan::New<v8::String>(classD.name).ToLocalChecked());
+    Nan::Set(retval, Nan::New<v8::String>("base").ToLocalChecked(), Nan::New<v8::Uint32>(classD.base));
     v8::Local<v8::String> v8type;
     switch(classD.type)
     {
@@ -19,26 +21,14 @@ v8::Local<v8::Value> v8ClassDescriptor(nogdb::ClassDescriptor classD){
         default : std::cout << "fail" << std::endl;
     }
     Nan::Set(retval, Nan::New<v8::String>("type").ToLocalChecked(), v8type);
-    v8::Local<v8::Object> classProperty = Nan::New<v8::Object>();
-    for (std::map<std::string, nogdb::PropertyDescriptor>::iterator it=classD.properties.begin(); it!=classD.properties.end(); ++it)
-    {
-        Nan::Set(classProperty, Nan::New<v8::String>(it->first).ToLocalChecked(), v8PropertyDescriptor(it->second));
-    }
-    Nan::Set(retval, Nan::New<v8::String>("properties").ToLocalChecked(), classProperty);
-    Nan::Set(retval, Nan::New<v8::String>("super").ToLocalChecked(), Nan::New<v8::String>(classD.super).ToLocalChecked());
-    v8::Local<v8::Array> sub = Nan::New<v8::Array>(classD.sub.size());
-    int i = 0;
-    for(std::vector<std::string>::iterator it = classD.sub.begin(); it != classD.sub.end(); ++it){
-        Nan::Set(sub, i, Nan::New<v8::String>(*it).ToLocalChecked());
-        i++;
-    }
-    Nan::Set(retval, Nan::New<v8::String>("sub").ToLocalChecked(), sub);
     return retval;
 }
 
 v8::Local<v8::Value> v8PropertyDescriptor(nogdb::PropertyDescriptor propD){
     v8::Local<v8::Object> retval = Nan::New<v8::Object>();
     Nan::Set(retval, Nan::New<v8::String>("id").ToLocalChecked(), Nan::New<v8::Uint32>(propD.id));
+    Nan::Set(retval, Nan::New<v8::String>("name").ToLocalChecked(), Nan::New<v8::String>(propD.name).ToLocalChecked());
+    Nan::Set(retval, Nan::New<v8::String>("inherited").ToLocalChecked(), Nan::New<v8::Boolean>(propD.inherited));
     v8::Local<v8::String> v8type;
     switch(propD.type)
     {
@@ -67,21 +57,21 @@ v8::Local<v8::Value> v8PropertyDescriptor(nogdb::PropertyDescriptor propD){
         default : std::cout << "fail" << std::endl;
     }
     Nan::Set(retval, Nan::New<v8::String>("type").ToLocalChecked(), v8type);
-    v8::Local<v8::Object> indexInfo = Nan::New<v8::Object>();
-    
-    for (std::map<nogdb::IndexId, std::pair<nogdb::ClassId, bool>>::iterator it=propD.indexInfo.begin(); it!=propD.indexInfo.end(); ++it)
-    {
-        v8::Local<v8::Object> value = Nan::New<v8::Object>();
-        Nan::Set(value, Nan::New<v8::String>("ClassId").ToLocalChecked(), Nan::New<v8::Uint32>(it->second.first));
-        Nan::Set(value, Nan::New<v8::String>("isUnique").ToLocalChecked(), Nan::New<v8::Boolean>(it->second.second));
-        Nan::Set(indexInfo, Nan::New<v8::Uint32>(it->first), value);
-    }
-    Nan::Set(retval, Nan::New<v8::String>("indexInfo").ToLocalChecked(), indexInfo);
+    return retval;
+}
+
+v8::Local<v8::Value> v8IndexDescriptor(nogdb::IndexDescriptor indexD){
+    v8::Local<v8::Object> retval = Nan::New<v8::Object>();
+    Nan::Set(retval, Nan::New<v8::String>("id").ToLocalChecked(), Nan::New<v8::Uint32>(indexD.id));
+    Nan::Set(retval, Nan::New<v8::String>("classId").ToLocalChecked(), Nan::New<v8::Uint32>(indexD.classId));
+    Nan::Set(retval, Nan::New<v8::String>("propertyId").ToLocalChecked(), Nan::New<v8::Uint32>(indexD.propertyId));
+    Nan::Set(retval, Nan::New<v8::String>("unique").ToLocalChecked(), Nan::New<v8::Boolean>(indexD.unique));
     return retval;
 }
 
 v8::Local<v8::Value> v8RecordDescriptor(nogdb::RecordDescriptor recD){
     v8::Local<v8::Object> retval = Nan::New<v8::Object>();
+    Nan::Set(retval, Nan::New<v8::String>("cid").ToLocalChecked(), Nan::New<v8::Uint32>(recD.cid));
     Nan::Set(retval, Nan::New<v8::String>("rid").ToLocalChecked(), v8RecordId(recD.rid));
     return retval;
 }
@@ -105,7 +95,6 @@ v8::Local<v8::Value> v8Record(nogdb::Record rec){
 
     Nan::Set(retval, Nan::New<v8::String>("properties").ToLocalChecked(), prop);
     Nan::Set(retval, Nan::New<v8::String>("value").ToLocalChecked(), values);
-
 
     Nan::Set(retval, Nan::New<v8::String>("className").ToLocalChecked(), Nan::New<v8::String>(rec.getClassName()).ToLocalChecked());
     Nan::Set(retval, Nan::New<v8::String>("rid").ToLocalChecked(), v8RecordId(rec.getRecordId()));
@@ -136,20 +125,18 @@ v8::Local<v8::Value> v8ResultSet(nogdb::ResultSet resultSet){
 
 v8::Local<v8::Value> v8Result(nogdb::Result result){
     v8::Local<v8::Object> retval = Nan::New<v8::Object>();
-    Nan::Set(retval, Nan::New<v8::String>("recordDescriptor").ToLocalChecked(), v8RecordDescriptor(result.descriptor));
+    Nan::Set(retval, Nan::New<v8::String>("descriptor").ToLocalChecked(), v8RecordDescriptor(result.descriptor));
     Nan::Set(retval, Nan::New<v8::String>("record").ToLocalChecked(), v8Record(result.record));
     return retval;
 }
 
-v8::Local<v8::Value> v8DBInfo(nogdb::DBInfo dbInfo){
+v8::Local<v8::Value> v8DbInfo(nogdb::DbInfo dbInfo){
     v8::Local<v8::Object> retval = Nan::New<v8::Object>();
     Nan::Set(retval, Nan::New<v8::String>("dbPath").ToLocalChecked(), Nan::New<v8::String>(dbInfo.dbPath).ToLocalChecked());
-    Nan::Set(retval, Nan::New<v8::String>("maxDB").ToLocalChecked(), Nan::New<v8::Number>(dbInfo.maxDB));
-    Nan::Set(retval, Nan::New<v8::String>("maxDBSize").ToLocalChecked(), Nan::New<v8::Number>(dbInfo.maxDBSize));
-    Nan::Set(retval, Nan::New<v8::String>("maxPropertyId").ToLocalChecked(), Nan::New<v8::Number>(dbInfo.maxPropertyId));
-    Nan::Set(retval, Nan::New<v8::String>("numProperty").ToLocalChecked(), Nan::New<v8::Number>(dbInfo.numProperty));
     Nan::Set(retval, Nan::New<v8::String>("maxClassId").ToLocalChecked(), Nan::New<v8::Number>(dbInfo.maxClassId));
     Nan::Set(retval, Nan::New<v8::String>("numClass").ToLocalChecked(), Nan::New<v8::Number>(dbInfo.numClass));
+    Nan::Set(retval, Nan::New<v8::String>("maxPropertyId").ToLocalChecked(), Nan::New<v8::Number>(dbInfo.maxPropertyId));
+    Nan::Set(retval, Nan::New<v8::String>("numProperty").ToLocalChecked(), Nan::New<v8::Number>(dbInfo.numProperty));
     Nan::Set(retval, Nan::New<v8::String>("maxIndexId").ToLocalChecked(), Nan::New<v8::Number>(dbInfo.maxIndexId));
     Nan::Set(retval, Nan::New<v8::String>("numIndex").ToLocalChecked(), Nan::New<v8::Number>(dbInfo.numIndex));
     return retval;
