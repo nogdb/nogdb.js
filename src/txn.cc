@@ -4,6 +4,7 @@
 
 #include "context.hpp"
 #include "txn.hpp"
+#include "toV8type.hpp"
 
 Nan::Persistent<v8::FunctionTemplate> Txn::constructor;
 
@@ -138,8 +139,32 @@ NAN_METHOD(Txn::isCompleted) {
 }
 
 NAN_METHOD(Txn::addClass) {
-    //TODO
-    info.GetReturnValue().SetUndefined();
+    //TODO don't know how to test yet --Tae
+    if(info.Length() == 2 && info[0]->IsString() && info[1]->IsString()){
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+        //check if READ_WRITE
+        nogdb::TxnMode mode = txn->base->getTxnMode();
+        if(mode!=nogdb::TxnMode::READ_WRITE)
+            Nan::ThrowError("Must be READ_WRITE mode to create class.");
+
+        std::string className = *Nan::Utf8String(info[0]->ToString());
+        std::string type = *Nan::Utf8String(info[1]->ToString());
+
+        nogdb::ClassType classType = nogdb::ClassType::VERTEX;
+        if(type=="VERTEX")      classType = nogdb::ClassType::VERTEX;
+        else if(type=="EDGE")   classType = nogdb::ClassType::EDGE;
+        else Nan::ThrowError("ClassType Invalid");
+        try {
+            nogdb::ClassDescriptor classD = txn->base->addClass(className, classType);
+            info.GetReturnValue().Set(v8ClassDescriptor(classD));
+        } catch ( nogdb::Error& err ){
+            Nan::ThrowError(err.what());
+        }
+    }
+    else
+    {
+        return Nan::ThrowError(Nan::New("Class.create() - invalid arugment(s)").ToLocalChecked());
+    }
 }
 
 NAN_METHOD(Txn::addSubClassOf) {
