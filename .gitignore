@@ -65,3 +65,4 @@ node_modules/*
 *.swp
 package-lock.json
 binding.gyp
+.vscode/
