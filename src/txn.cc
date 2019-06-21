@@ -127,8 +127,14 @@ NAN_METHOD(Txn::getTxnMode) {
 }
 
 NAN_METHOD(Txn::isCompleted) {
-    //TODO
-    info.GetReturnValue().SetUndefined();
+    //TODO don't know how to test yet --Tae
+    Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+    try {
+        bool isCompleted = txn->base->isCompleted();
+        info.GetReturnValue().Set(Nan::New(isCompleted));
+    } catch ( nogdb::Error& err ){
+        Nan::ThrowError(err.what());
+    }
 }
 
 NAN_METHOD(Txn::addClass) {
