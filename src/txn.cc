@@ -397,8 +397,32 @@ NAN_METHOD(Txn::getClasses) {
 }
 
 NAN_METHOD(Txn::getPropertiesByClassName) {
-    //TODO
-    info.GetReturnValue().SetUndefined();
+    //TODO not tested yet --Tae
+
+    if(info.Length() == 1 && info[0]->IsString()){
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+
+        std::string className = *Nan::Utf8String(info[0]->ToString());
+
+        try {
+            std::vector<nogdb::PropertyDescriptor> props = txn->base->getProperties(className);
+            v8::Local<v8::Array> retval = Nan::New<v8::Array>(props.size());
+            int i = 0;
+            for(std::vector<nogdb::PropertyDescriptor>::iterator it = props.begin(); it != props.end(); ++it)
+            {
+                Nan::Set(retval, i, v8PropertyDescriptor(*it));
+                i++;
+            }
+            info.GetReturnValue().Set(retval);
+        } catch ( nogdb::Error& err ){
+            Nan::ThrowError(err.what());
+        }
+    }
+    else
+    {
+        return Nan::ThrowError(Nan::New("Txn.dropIndex() - invalid argument(s)").ToLocalChecked());
+    }
+    
 }
 
 NAN_METHOD(Txn::getPropertiesByClassDescriptor) {
