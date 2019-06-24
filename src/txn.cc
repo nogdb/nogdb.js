@@ -479,8 +479,25 @@ NAN_METHOD(Txn::getProperty) {
 }
 
 NAN_METHOD(Txn::getIndex) {
-    //TODO
-    info.GetReturnValue().SetUndefined();
+    //TODO not tested yet --Tae
+    
+    if(info.Length() == 2 && info[0]->IsString() && info[1]->IsString()){
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+
+        std::string className = *Nan::Utf8String(info[0]->ToString());
+        std::string propName = *Nan::Utf8String(info[1]->ToString());
+
+        try {
+            nogdb::IndexDescriptor indexDesc = txn->base->getIndex(className,propName);
+            info.GetReturnValue().Set(v8IndexDescriptor(indexDesc));
+        } catch ( nogdb::Error& err ){
+            Nan::ThrowError(err.what());
+        }
+    }
+    else
+    {
+        return Nan::ThrowError(Nan::New("Txn.getIndex() - invalid argument(s)").ToLocalChecked());
+    }
 }
 
 NAN_METHOD(Txn::fetchRecord) {
