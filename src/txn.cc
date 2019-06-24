@@ -224,7 +224,7 @@ NAN_METHOD(Txn::renameClass) {
 NAN_METHOD(Txn::addProperty) {
     //TODO not tested yet --Tae
     
-    if(info.Length() == 3 && info[0]->IsString() && info[1]->IsString() && && info[2]->IsString()){
+    if(info.Length() == 3 && info[0]->IsString() && info[1]->IsString() && info[2]->IsString()){
         Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
         nogdb::TxnMode mode = txn->base->getTxnMode();
         if(mode!=nogdb::TxnMode::READ_WRITE)
@@ -232,10 +232,24 @@ NAN_METHOD(Txn::addProperty) {
 
         std::string className = *Nan::Utf8String(info[0]->ToString());
         std::string propName = *Nan::Utf8String(info[1]->ToString());
-        std::string propType = *Nan::Utf8String(info[2]->ToString());
+        std::string type = *Nan::Utf8String(info[2]->ToString());
+
+        nogdb::PropertyType propertyType = nogdb::PropertyType::TEXT;
+        if(type=="TINYINT")                 propertyType = nogdb::PropertyType::TINYINT;
+        else if(type=="UNSIGNED_TINYINT")   propertyType = nogdb::PropertyType::UNSIGNED_TINYINT;
+        else if(type=="SMALLINT")           propertyType = nogdb::PropertyType::SMALLINT;
+        else if(type=="UNSIGNED_SMALLINT")  propertyType = nogdb::PropertyType::UNSIGNED_SMALLINT;
+        else if(type=="INTEGER")            propertyType = nogdb::PropertyType::INTEGER;
+        else if(type=="UNSIGNED_INTEGER")   propertyType = nogdb::PropertyType::UNSIGNED_INTEGER;
+        else if(type=="BIGINT")             propertyType = nogdb::PropertyType::BIGINT;
+        else if(type=="UNSIGNED_BIGINT")    propertyType = nogdb::PropertyType::UNSIGNED_BIGINT;
+        else if(type=="TEXT")               propertyType = nogdb::PropertyType::TEXT;
+        else if(type=="REAL")               propertyType = nogdb::PropertyType::REAL;
+        else if(type=="BLOB")               propertyType = nogdb::PropertyType::BLOB;
+        else Nan::ThrowError("propertyType Invalid");
 
         try {
-            nogdb::PropertyDescriptor pdesc = txn->base->addProperty(className,propName,propType);
+            nogdb::PropertyDescriptor pdesc = txn->base->addProperty(className,propName,propertyType);
             info.GetReturnValue().Set(v8PropertyDescriptor(pdesc));
         } catch ( nogdb::Error& err ){
             Nan::ThrowError(err.what());
@@ -250,7 +264,7 @@ NAN_METHOD(Txn::addProperty) {
 NAN_METHOD(Txn::renameProperty) {
     //TODO not tested yet --Tae
     
-    if(info.Length() == 3 && info[0]->IsString() && info[1]->IsString() && && info[2]->IsString()){
+    if(info.Length() == 3 && info[0]->IsString() && info[1]->IsString() && info[2]->IsString()){
         Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
         nogdb::TxnMode mode = txn->base->getTxnMode();
         if(mode!=nogdb::TxnMode::READ_WRITE)
@@ -274,8 +288,28 @@ NAN_METHOD(Txn::renameProperty) {
 }
 
 NAN_METHOD(Txn::dropProperty) {
-    //TODO
-    info.GetReturnValue().SetUndefined();
+    //TODO not tested yet --Tae
+    
+    if(info.Length() == 2 && info[0]->IsString() && info[1]->IsString()){
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+        nogdb::TxnMode mode = txn->base->getTxnMode();
+        if(mode!=nogdb::TxnMode::READ_WRITE)
+            Nan::ThrowError("Must be READ_WRITE mode to add class property.");
+
+        std::string className = *Nan::Utf8String(info[0]->ToString());
+        std::string propName = *Nan::Utf8String(info[1]->ToString());
+
+        try {
+            txn->base->dropProperty(className,propName);
+            info.GetReturnValue().SetUndefined();
+        } catch ( nogdb::Error& err ){
+            Nan::ThrowError(err.what());
+        }
+    }
+    else
+    {
+        return Nan::ThrowError(Nan::New("Txn.dropProperty() - invalid argument(s)").ToLocalChecked());
+    }
 }
 
 NAN_METHOD(Txn::addIndex) {
