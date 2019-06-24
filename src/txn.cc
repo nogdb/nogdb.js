@@ -420,7 +420,7 @@ NAN_METHOD(Txn::getPropertiesByClassName) {
     }
     else
     {
-        return Nan::ThrowError(Nan::New("Txn.dropIndex() - invalid argument(s)").ToLocalChecked());
+        return Nan::ThrowError(Nan::New("Txn.getPropertiesByClassName() - invalid argument(s)").ToLocalChecked());
     }
     
 }
@@ -431,8 +431,24 @@ NAN_METHOD(Txn::getPropertiesByClassDescriptor) {
 }
 
 NAN_METHOD(Txn::getClassByName) {
-    //TODO
-    info.GetReturnValue().SetUndefined();
+    //TODO not tested yet --Tae
+
+    if(info.Length() == 1 && info[0]->IsString()){
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+
+        std::string className = *Nan::Utf8String(info[0]->ToString());
+
+        try {
+            nogdb::ClassDescriptor classDesc = txn->base->getClass(className);
+            info.GetReturnValue().Set(v8ClassDescriptor(classDesc));
+        } catch ( nogdb::Error& err ){
+            Nan::ThrowError(err.what());
+        }
+    }
+    else
+    {
+        return Nan::ThrowError(Nan::New("Txn.getClassByName() - invalid argument(s)").ToLocalChecked());
+    }
 }
 
 NAN_METHOD(Txn::getClassById) {
