@@ -377,8 +377,23 @@ NAN_METHOD(Txn::getDbInfo) {
 }
 
 NAN_METHOD(Txn::getClasses) {
-    //TODO
-    info.GetReturnValue().SetUndefined();
+    //TODO not tested yet --Tae
+
+    Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+
+    try {
+        std::vector<nogdb::ClassDescriptor> classes = txn->base->getClasses();
+        v8::Local<v8::Array> retval = Nan::New<v8::Array>(classes.size());
+        int i = 0;
+        for(std::vector<nogdb::ClassDescriptor>::iterator it = classes.begin(); it != classes.end(); ++it)
+        {
+            Nan::Set(retval, i, v8ClassDescriptor(*it));
+            i++;
+        }
+        info.GetReturnValue().Set(retval);
+    } catch ( nogdb::Error& err ){
+        Nan::ThrowError(err.what());
+    }
 }
 
 NAN_METHOD(Txn::getPropertiesByClassName) {
