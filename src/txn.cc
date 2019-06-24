@@ -268,7 +268,7 @@ NAN_METHOD(Txn::renameProperty) {
         Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
         nogdb::TxnMode mode = txn->base->getTxnMode();
         if(mode!=nogdb::TxnMode::READ_WRITE)
-            Nan::ThrowError("Must be READ_WRITE mode to add class property.");
+            Nan::ThrowError("Must be READ_WRITE mode to rename class property.");
 
         std::string className = *Nan::Utf8String(info[0]->ToString());
         std::string oldPropName = *Nan::Utf8String(info[1]->ToString());
@@ -294,7 +294,7 @@ NAN_METHOD(Txn::dropProperty) {
         Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
         nogdb::TxnMode mode = txn->base->getTxnMode();
         if(mode!=nogdb::TxnMode::READ_WRITE)
-            Nan::ThrowError("Must be READ_WRITE mode to add class property.");
+            Nan::ThrowError("Must be READ_WRITE mode to drop class property.");
 
         std::string className = *Nan::Utf8String(info[0]->ToString());
         std::string propName = *Nan::Utf8String(info[1]->ToString());
@@ -317,7 +317,7 @@ NAN_METHOD(Txn::addIndex) {
         Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
         nogdb::TxnMode mode = txn->base->getTxnMode();
         if(mode!=nogdb::TxnMode::READ_WRITE)
-            Nan::ThrowError("Must be READ_WRITE mode to add class property.");
+            Nan::ThrowError("Must be READ_WRITE mode to add index.");
 
         std::string className = *Nan::Utf8String(info[0]->ToString());
         std::string propName = *Nan::Utf8String(info[1]->ToString());
