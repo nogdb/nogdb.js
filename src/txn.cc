@@ -89,7 +89,7 @@ NAN_METHOD(Txn::New)
     }
     else
     {
-        return Nan::ThrowError(Nan::New("new Txn() - invalid arugment(s)").ToLocalChecked());
+        return Nan::ThrowError(Nan::New("new Txn() - invalid argument(s)").ToLocalChecked());
     }
 }
 
@@ -163,7 +163,7 @@ NAN_METHOD(Txn::addClass) {
     }
     else
     {
-        return Nan::ThrowError(Nan::New("Class.create() - invalid arugment(s)").ToLocalChecked());
+        return Nan::ThrowError(Nan::New("Txn.addClass() - invalid argument(s)").ToLocalChecked());
     }
 }
 
@@ -190,6 +190,10 @@ NAN_METHOD(Txn::dropClass) {
             Nan::ThrowError(err.what());
         }
     }
+    else
+    {
+        return Nan::ThrowError(Nan::New("Txn.dropClass() - invalid argument(s)").ToLocalChecked());
+    }
 }
 
 NAN_METHOD(Txn::renameClass) {
@@ -211,11 +215,36 @@ NAN_METHOD(Txn::renameClass) {
             Nan::ThrowError(err.what());
         }
     }
+    else
+    {
+        return Nan::ThrowError(Nan::New("Txn.renameClass() - invalid argument(s)").ToLocalChecked());
+    }
 }
 
 NAN_METHOD(Txn::addProperty) {
-    //TODO
-    info.GetReturnValue().SetUndefined();
+    //TODO not tested yet --Tae
+    
+    if(info.Length() == 3 && info[0]->IsString() && info[1]->IsString() && && info[2]->IsString()){
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+        nogdb::TxnMode mode = txn->base->getTxnMode();
+        if(mode!=nogdb::TxnMode::READ_WRITE)
+            Nan::ThrowError("Must be READ_WRITE mode to add class property.");
+
+        std::string className = *Nan::Utf8String(info[0]->ToString());
+        std::string propName = *Nan::Utf8String(info[1]->ToString());
+        std::string propType = *Nan::Utf8String(info[2]->ToString());
+
+        try {
+            nogdb::PropertyDescriptor pdesc = txn->base->addProperty(className,propName,propType);
+            info.GetReturnValue().Set(v8PropertyDescriptor(pdesc));
+        } catch ( nogdb::Error& err ){
+            Nan::ThrowError(err.what());
+        }
+    }
+    else
+    {
+        return Nan::ThrowError(Nan::New("Txn.addProperty() - invalid argument(s)").ToLocalChecked());
+    }
 }
 
 NAN_METHOD(Txn::renameProperty) {
