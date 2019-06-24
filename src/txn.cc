@@ -248,8 +248,29 @@ NAN_METHOD(Txn::addProperty) {
 }
 
 NAN_METHOD(Txn::renameProperty) {
-    //TODO
-    info.GetReturnValue().SetUndefined();
+    //TODO not tested yet --Tae
+    
+    if(info.Length() == 3 && info[0]->IsString() && info[1]->IsString() && && info[2]->IsString()){
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+        nogdb::TxnMode mode = txn->base->getTxnMode();
+        if(mode!=nogdb::TxnMode::READ_WRITE)
+            Nan::ThrowError("Must be READ_WRITE mode to add class property.");
+
+        std::string className = *Nan::Utf8String(info[0]->ToString());
+        std::string oldPropName = *Nan::Utf8String(info[1]->ToString());
+        std::string newPropName = *Nan::Utf8String(info[2]->ToString());
+
+        try {
+            txn->base->renameProperty(className,oldPropName,newPropName);
+            info.GetReturnValue().SetUndefined();
+        } catch ( nogdb::Error& err ){
+            Nan::ThrowError(err.what());
+        }
+    }
+    else
+    {
+        return Nan::ThrowError(Nan::New("Txn.renameProperty() - invalid argument(s)").ToLocalChecked());
+    }
 }
 
 NAN_METHOD(Txn::dropProperty) {
