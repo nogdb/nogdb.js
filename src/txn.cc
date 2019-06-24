@@ -193,8 +193,24 @@ NAN_METHOD(Txn::dropClass) {
 }
 
 NAN_METHOD(Txn::renameClass) {
-    //TODO
-    info.GetReturnValue().SetUndefined();
+    //TODO not tested yet --Tae
+
+    if(info.Length() == 2 && info[0]->IsString() && info[1]->IsString()){
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+        nogdb::TxnMode mode = txn->base->getTxnMode();
+        if(mode!=nogdb::TxnMode::READ_WRITE)
+            Nan::ThrowError("Must be READ_WRITE mode to drop class.");
+
+        std::string className = *Nan::Utf8String(info[0]->ToString());
+        std::string newName = *Nan::Utf8String(info[1]->ToString());
+
+        try {
+            txn->base->renameClass(className,newName);
+            info.GetReturnValue().SetUndefined();
+        } catch ( nogdb::Error& err ){
+            Nan::ThrowError(err.what());
+        }
+    }
 }
 
 NAN_METHOD(Txn::addProperty) {
