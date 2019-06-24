@@ -313,6 +313,8 @@ NAN_METHOD(Txn::dropProperty) {
 }
 
 NAN_METHOD(Txn::addIndex) {
+    //TODO not tested yet --Tae
+
     if(info.Length() == 3 && info[0]->IsString() && info[1]->IsString() && info[2]->IsBoolean()){
         Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
         nogdb::TxnMode mode = txn->base->getTxnMode();
@@ -337,13 +339,41 @@ NAN_METHOD(Txn::addIndex) {
 }
 
 NAN_METHOD(Txn::dropIndex) {
-    //TODO
-    info.GetReturnValue().SetUndefined();
+    //TODO not tested yet --Tae
+
+    if(info.Length() == 2 && info[0]->IsString() && info[1]->IsString()){
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+        nogdb::TxnMode mode = txn->base->getTxnMode();
+        if(mode!=nogdb::TxnMode::READ_WRITE)
+            Nan::ThrowError("Must be READ_WRITE mode to drop index.");
+
+        std::string className = *Nan::Utf8String(info[0]->ToString());
+        std::string propName = *Nan::Utf8String(info[1]->ToString());
+
+        try {
+            txn->base->dropIndex(className,propName);
+            info.GetReturnValue().SetUndefined();
+        } catch ( nogdb::Error& err ){
+            Nan::ThrowError(err.what());
+        }
+    }
+    else
+    {
+        return Nan::ThrowError(Nan::New("Txn.dropIndex() - invalid argument(s)").ToLocalChecked());
+    }
 }
 
 NAN_METHOD(Txn::getDbInfo) {
-    //TODO
-    info.GetReturnValue().SetUndefined();
+    //TODO not tested yet --Tae
+
+    Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+
+    try {
+        nogdb::DbInfo dbInfo = txn->base->getDbInfo();
+        info.GetReturnValue().Set(v8DBInfo(dbInfo));
+    } catch ( nogdb::Error& err ){
+        Nan::ThrowError(err.what());
+    }
 }
 
 NAN_METHOD(Txn::getClasses) {
