@@ -426,8 +426,50 @@ NAN_METHOD(Txn::getPropertiesByClassName) {
 }
 
 NAN_METHOD(Txn::getPropertiesByClassDescriptor) {
-    //TODO
-    info.GetReturnValue().SetUndefined();
+    //TODO not tested yet --Tae
+    if (info.Length() == 1 && info[0]->IsObject()){
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+
+        v8::Local<v8::Object> ClassDescIn = info[0]->ToObject();
+        
+        v8::Local<v8::String> idProp = Nan::New("id").ToLocalChecked();
+        v8::Local<v8::String> nameProp = Nan::New("name").ToLocalChecked();
+        v8::Local<v8::String> baseProp = Nan::New("base").ToLocalChecked();
+        v8::Local<v8::String> typeProp = Nan::New("type").ToLocalChecked();
+
+        if (Nan::HasOwnProperty(ClassDescIn, idProp).FromJust()) {
+            v8::Local<v8::Value> idValue = Nan::Get(ClassDescIn, idProp);
+            nogdb::ClassId id = Nan::ObjectWrap::Unwrap<nogdb::ClassId>(idValue);
+        }
+        if (Nan::HasOwnProperty(ClassDescIn, nameProp).FromJust()) {
+            v8::Local<v8::Value> nameValue = Nan::Get(ClassDescIn, nameProp);
+            std::string name = *Nan::Utf8String(nameValue->ToString());
+        }
+        if (Nan::HasOwnProperty(ClassDescIn, baseProp).FromJust()) {
+            v8::Local<v8::Value> baseValue = Nan::Get(ClassDescIn, baseProp);
+            nogdb::ClassId id = Nan::ObjectWrap::Unwrap<nogdb::ClassId>(baseValue);
+        }
+        if (Nan::HasOwnProperty(ClassDescIn, typeProp).FromJust()) {
+            v8::Local<v8::Value> typeValue = Nan::Get(ClassDescIn, typeProp);
+            nogdb::ClassType classType = Nan::ObjectWrap::Unwrap<nogdb::ClassType>(typeValue);
+        }
+        nogdb::ClassDescriptor classDesc = new nogdb::ClassDescriptor(id,name,base,classType);
+
+        std::vector<nogdb::PropertyDescriptor> props = txn->base->getProperties(classDesc);
+
+        v8::Local<v8::Array> retval = Nan::New<v8::Array>(props.size());
+        int i = 0;
+        for(std::vector<nogdb::PropertyDescriptor>::iterator it = props.begin(); it != props.end(); ++it)
+        {
+            Nan::Set(retval, i, v8PropertyDescriptor(*it));
+            i++;
+        }
+        info.GetReturnValue().Set(retval);
+    }
+    else
+    {
+        return Nan::ThrowError(Nan::New("Txn.getPropertiesByClassDescriptor() - invalid argument(s)").ToLocalChecked());
+    }
 }
 
 NAN_METHOD(Txn::getClassByName) {
