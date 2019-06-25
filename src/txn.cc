@@ -458,9 +458,9 @@ NAN_METHOD(Txn::getPropertiesByClassDescriptor) {
             v8::Local<v8::Value> typeValue = Nan::Get(ClassDescIn, typeProp).ToLocalChecked();
             classType = Nan::ObjectWrap::Unwrap<nogdb::ClassType>(typeValue);
         }
-        nogdb::ClassDescriptor classDesc = new nogdb::ClassDescriptor(id,name,baseClass,classType);
+        nogdb::ClassDescriptor *classDesc = new nogdb::ClassDescriptor(*id,name,*baseClass,*classType);
 
-        std::vector<nogdb::PropertyDescriptor> props = txn->base->getProperties(classDesc);
+        std::vector<nogdb::PropertyDescriptor> props = txn->base->getProperties(*classDesc);
 
         v8::Local<v8::Array> retval = Nan::New<v8::Array>(props.size());
         int i = 0;
