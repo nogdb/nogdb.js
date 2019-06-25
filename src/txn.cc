@@ -437,23 +437,28 @@ NAN_METHOD(Txn::getPropertiesByClassDescriptor) {
         v8::Local<v8::String> baseProp = Nan::New("base").ToLocalChecked();
         v8::Local<v8::String> typeProp = Nan::New("type").ToLocalChecked();
 
+        nogdb::ClassId *id = new nogdb::ClassId();
+        std::string name = "";
+        nogdb::ClassId *baseClass = new nogdb::ClassId();
+        nogdb::ClassType *classType = new nogdb::ClassType();
+
         if (Nan::HasOwnProperty(ClassDescIn, idProp).FromJust()) {
-            v8::Local<v8::Value> idValue = Nan::Get(ClassDescIn, idProp);
-            nogdb::ClassId id = Nan::ObjectWrap::Unwrap<nogdb::ClassId>(idValue);
+            v8::Local<v8::Value> idValue = Nan::Get(ClassDescIn, idProp).ToLocalChecked();
+            id = Nan::ObjectWrap::Unwrap<nogdb::ClassId>(idValue);
         }
         if (Nan::HasOwnProperty(ClassDescIn, nameProp).FromJust()) {
-            v8::Local<v8::Value> nameValue = Nan::Get(ClassDescIn, nameProp);
-            std::string name = *Nan::Utf8String(nameValue->ToString());
+            v8::Local<v8::Value> nameValue = Nan::Get(ClassDescIn, nameProp).ToLocalChecked();
+            name = *Nan::Utf8String(nameValue->ToString());
         }
         if (Nan::HasOwnProperty(ClassDescIn, baseProp).FromJust()) {
-            v8::Local<v8::Value> baseValue = Nan::Get(ClassDescIn, baseProp);
-            nogdb::ClassId id = Nan::ObjectWrap::Unwrap<nogdb::ClassId>(baseValue);
+            v8::Local<v8::Value> baseValue = Nan::Get(ClassDescIn, baseProp).ToLocalChecked();
+            baseClass = Nan::ObjectWrap::Unwrap<nogdb::ClassId>(baseValue);
         }
         if (Nan::HasOwnProperty(ClassDescIn, typeProp).FromJust()) {
-            v8::Local<v8::Value> typeValue = Nan::Get(ClassDescIn, typeProp);
-            nogdb::ClassType classType = Nan::ObjectWrap::Unwrap<nogdb::ClassType>(typeValue);
+            v8::Local<v8::Value> typeValue = Nan::Get(ClassDescIn, typeProp).ToLocalChecked();
+            classType = Nan::ObjectWrap::Unwrap<nogdb::ClassType>(typeValue);
         }
-        nogdb::ClassDescriptor classDesc = new nogdb::ClassDescriptor(id,name,base,classType);
+        nogdb::ClassDescriptor classDesc = new nogdb::ClassDescriptor(id,name,baseClass,classType);
 
         std::vector<nogdb::PropertyDescriptor> props = txn->base->getProperties(classDesc);
 
