@@ -60,3 +60,8 @@ nogdb::RecordDescriptor toRecordDescriptor(v8::Local<v8::Object> RecordDescIn){
 
   return recordDesc;
 }
+
+nogdb::Record toRecord(v8::Local<v8::Object> RecordIn){
+  v8::Local<v8::Value> classNameValue = Nan::Get(RecordIn, Nan::New<v8::String>("className").ToLocalChecked()).ToLocalChecked();
+  std::string className = *Nan::Utf8String(classNameValue->ToString());
+}

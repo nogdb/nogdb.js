@@ -547,11 +547,29 @@ NAN_METHOD(Txn::fetchRecord) {
         } catch ( nogdb::Error& err ){
             Nan::ThrowError(err.what());
         }
+    } else {
+        return Nan::ThrowError(Nan::New("Txn.fetchRecord() - invalid argument(s)").ToLocalChecked());
     }
 }
 
 NAN_METHOD(Txn::addVertex) {
-    //TODO
+    //TODO not tested yet --Tae
+
+    if(info.Length() == 2 && info[0]->IsString() && info[1]->IsObject()){
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+
+        nogdb::TxnMode mode = txn->base->getTxnMode();
+        if(mode!=nogdb::TxnMode::READ_WRITE)
+            Nan::ThrowError("Must be READ_WRITE mode to add vertex.");
+
+        std::string className = *Nan::Utf8String(info[0]->ToString());
+
+        nogdb::Record newRec = new nogdb::Record();
+    } else {
+        return Nan::ThrowError(Nan::New("Txn.addVertex() - invalid argument(s)").ToLocalChecked());
+    }
+
+
     info.GetReturnValue().SetUndefined();
 }
 
