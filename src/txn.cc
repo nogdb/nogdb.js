@@ -474,8 +474,19 @@ NAN_METHOD(Txn::getClassByName) {
 }
 
 NAN_METHOD(Txn::getClassById) {
-    //TODO
-    info.GetReturnValue().SetUndefined();
+    //TODO not tested yet --Tae
+    
+    if (info.Length() != 1){
+        return Nan::ThrowError(Nan::New("Txn.getClassById() - invalid argument(s)").ToLocalChecked());
+    } else if (info[0]->IsNumber()){
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+        unsigned int id = info[0]->Uint32Value();
+        nogdb::ClassId *nogId = new nogdb::ClassId(id);
+        nogdb::ClassDescriptor classDesc = txn->base->getClass(*nogId);
+        info.GetReturnValue().Set(v8ClassDescriptor(classDesc));
+    } else {
+        return Nan::ThrowError(Nan::New("Txn.getClassById() - invalid argument(s)").ToLocalChecked());
+    }
 }
 
 NAN_METHOD(Txn::getProperty) {

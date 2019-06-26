@@ -40,7 +40,7 @@ nogdb::ClassDescriptor toClassDescriptor(v8::Local<v8::Object> ClassDescIn){
   } else if (strcmp(classType.c_str(),"UNDEFINED")){
       *nogType = nogdb::ClassType::UNDEFINED;
   } else {
-      return Nan::ThrowError(Nan::New("Txn.getPropertiesByClassDescriptor() - invalid classType").ToLocalChecked());
+      return Nan::ThrowError(Nan::New("invalid classType").ToLocalChecked());
   }
 
   nogdb::ClassDescriptor classDesc = nogdb::ClassDescriptor(*nogid,name,*nogBase,*nogType);
