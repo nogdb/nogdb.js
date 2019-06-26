@@ -47,3 +47,16 @@ nogdb::ClassDescriptor toClassDescriptor(v8::Local<v8::Object> ClassDescIn){
 
   return classDesc;
 }
+
+nogdb::RecordDescriptor toRecordDescriptor(v8::Local<v8::Object> RecordDescIn){
+
+  v8::Local<v8::Object> rid = Nan::Get(RecordDescIn, Nan::New<v8::String>("rid").ToLocalChecked()).ToLocalChecked()->ToObject();
+  unsigned int classId = Nan::Get(rid, Nan::New<v8::String>("classId").ToLocalChecked()).ToLocalChecked()->Uint32Value();
+  unsigned int positionId = Nan::Get(rid, Nan::New<v8::String>("positionId").ToLocalChecked()).ToLocalChecked()->Uint32Value();
+  unsigned int clusterId = Nan::Get(RecordDescIn, Nan::New<v8::String>("cid").ToLocalChecked()).ToLocalChecked()->Uint32Value();
+
+  nogdb::RecordId nogRid = new nogdb::RecordId(classId,positionId);
+  nogdb::RecordDescriptor recordDesc = new nogdb::RecordDescriptor(nogRid,clusterId);
+
+  return recordDesc;
+}

@@ -534,8 +534,20 @@ NAN_METHOD(Txn::getIndex) {
 }
 
 NAN_METHOD(Txn::fetchRecord) {
-    //TODO
-    info.GetReturnValue().SetUndefined();
+    //TODO not tested yet --Tae
+
+    if(info.Length() == 1 && info[0]->IsObject()){
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+
+        nogdb::RecordDescriptor recordDesc = toRecordDescriptor(info[0]->ToObject());
+
+        try {
+            nogdb::Record rec = txn->base->fetchRecord(recordDesc);
+            info.GetReturnValue().Set(v8Record(rec));
+        } catch ( nogdb::Error& err ){
+            Nan::ThrowError(err.what());
+        }
+    }
 }
 
 NAN_METHOD(Txn::addVertex) {
