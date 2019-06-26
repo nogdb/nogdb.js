@@ -437,14 +437,14 @@ NAN_METHOD(Txn::getPropertiesByClassDescriptor) {
         v8::Local<v8::String> baseProp = Nan::New("base").ToLocalChecked();
         v8::Local<v8::String> typeProp = Nan::New("type").ToLocalChecked();
 
-        nogdb::ClassId *id = new nogdb::ClassId();
+        double id = 0;
         std::string name = "";
-        nogdb::ClassId *baseClass = new nogdb::ClassId();
-        nogdb::ClassType *classType = new nogdb::ClassType();
+        double baseClass = 0;
+        std::string classType = "";
 
         if (Nan::HasOwnProperty(ClassDescIn, idProp).FromJust()) {
             v8::Local<v8::Value> idValue = Nan::Get(ClassDescIn, idProp).ToLocalChecked();
-            id = Nan::ObjectWrap::Unwrap<nogdb::ClassId>(idValue);
+            id = idValue->NumberValue();
         }
         if (Nan::HasOwnProperty(ClassDescIn, nameProp).FromJust()) {
             v8::Local<v8::Value> nameValue = Nan::Get(ClassDescIn, nameProp).ToLocalChecked();
@@ -452,15 +452,29 @@ NAN_METHOD(Txn::getPropertiesByClassDescriptor) {
         }
         if (Nan::HasOwnProperty(ClassDescIn, baseProp).FromJust()) {
             v8::Local<v8::Value> baseValue = Nan::Get(ClassDescIn, baseProp).ToLocalChecked();
-            baseClass = Nan::ObjectWrap::Unwrap<nogdb::ClassId>(baseValue);
+            baseClass = baseValue->NumberValue();
         }
         if (Nan::HasOwnProperty(ClassDescIn, typeProp).FromJust()) {
             v8::Local<v8::Value> typeValue = Nan::Get(ClassDescIn, typeProp).ToLocalChecked();
-            classType = Nan::ObjectWrap::Unwrap<nogdb::ClassType>(typeValue);
+            classType = *Nan::Utf8String(typeValue->ToString());
         }
-        nogdb::ClassDescriptor *classDesc = new nogdb::ClassDescriptor(*id,name,*baseClass,*classType);
 
-        std::vector<nogdb::PropertyDescriptor> props = txn->base->getProperties(*classDesc);
+        nogdb::ClassId *nogid = new nogdb::ClassId(id);
+        nogdb::ClassId *nogBase = new nogdb::ClassId(id);
+        nogdb::ClassType *nogType = new nogdb::ClassType();
+        if (strcmp(classType.c_str(),"EDGE")){
+            *nogType = nogdb::ClassType::EDGE;
+        } else if (strcmp(classType.c_str(),"VERTEX")){
+            *nogType = nogdb::ClassType::VERTEX;
+        } else if (strcmp(classType.c_str(),"UNDEFINED")){
+            *nogType = nogdb::ClassType::UNDEFINED;
+        } else {
+            return Nan::ThrowError(Nan::New("Txn.getPropertiesByClassDescriptor() - invalid classType").ToLocalChecked());
+        }
+
+        nogdb::ClassDescriptor classDesc = nogdb::ClassDescriptor(*nogid,name,*nogBase,*nogType);
+
+        std::vector<nogdb::PropertyDescriptor> props = txn->base->getProperties(classDesc);
 
         v8::Local<v8::Array> retval = Nan::New<v8::Array>(props.size());
         int i = 0;
