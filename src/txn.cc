@@ -5,6 +5,8 @@
 #include "context.hpp"
 #include "txn.hpp"
 #include "toV8type.hpp"
+#include "convertInput.hpp"
+#include "record.hpp"
 
 Nan::Persistent<v8::FunctionTemplate> Txn::constructor;
 
@@ -89,7 +91,7 @@ NAN_METHOD(Txn::New)
     }
     else
     {
-        return Nan::ThrowError(Nan::New("new Txn() - invalid arugment(s)").ToLocalChecked());
+        return Nan::ThrowError(Nan::New("new Txn() - invalid argument(s)").ToLocalChecked());
     }
 }
 
@@ -163,133 +165,593 @@ NAN_METHOD(Txn::addClass) {
     }
     else
     {
-        return Nan::ThrowError(Nan::New("Class.create() - invalid arugment(s)").ToLocalChecked());
+        return Nan::ThrowError(Nan::New("Txn.addClass() - invalid argument(s)").ToLocalChecked());
     }
 }
 
 NAN_METHOD(Txn::addSubClassOf) {
-    //TODO
-    info.GetReturnValue().SetUndefined();
+    //TODO not tested yet --Tae
+
+    if (info.Length() == 2 && info[0]->IsString() && info[1]->IsString()){
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+        nogdb::TxnMode mode = txn->base->getTxnMode();
+        if(mode!=nogdb::TxnMode::READ_WRITE)
+            Nan::ThrowError("Must be READ_WRITE mode to add sub class.");
+
+        std::string superClass = *Nan::Utf8String(info[0]->ToString());
+        std::string className = *Nan::Utf8String(info[1]->ToString());
+
+        try {
+            nogdb::ClassDescriptor classDesc = txn->base->addSubClassOf(superClass, className);
+            info.GetReturnValue().Set(v8ClassDescriptor(classDesc));
+        } catch ( nogdb::Error& err ){
+            Nan::ThrowError(err.what());
+        }
+    }
+    else
+    {
+        return Nan::ThrowError(Nan::New("Txn.addSubClassOf() - invalid argument(s)").ToLocalChecked());
+    }
 }
 
 NAN_METHOD(Txn::dropClass) {
-    //TODO
-    info.GetReturnValue().SetUndefined();
+    //TODO not tested yet --Tae
+
+    if(info.Length() == 1 && info[0]->IsString()){
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+        nogdb::TxnMode mode = txn->base->getTxnMode();
+        if(mode!=nogdb::TxnMode::READ_WRITE)
+            Nan::ThrowError("Must be READ_WRITE mode to drop class.");
+
+        std::string className = *Nan::Utf8String(info[0]->ToString());
+
+        try {
+            txn->base->dropClass(className);
+            info.GetReturnValue().SetUndefined();
+        } catch ( nogdb::Error& err ){
+            Nan::ThrowError(err.what());
+        }
+    }
+    else
+    {
+        return Nan::ThrowError(Nan::New("Txn.dropClass() - invalid argument(s)").ToLocalChecked());
+    }
 }
 
 NAN_METHOD(Txn::renameClass) {
-    //TODO
-    info.GetReturnValue().SetUndefined();
+    //TODO not tested yet --Tae
+
+    if(info.Length() == 2 && info[0]->IsString() && info[1]->IsString()){
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+        nogdb::TxnMode mode = txn->base->getTxnMode();
+        if(mode!=nogdb::TxnMode::READ_WRITE)
+            Nan::ThrowError("Must be READ_WRITE mode to drop class.");
+
+        std::string className = *Nan::Utf8String(info[0]->ToString());
+        std::string newName = *Nan::Utf8String(info[1]->ToString());
+
+        try {
+            txn->base->renameClass(className,newName);
+            info.GetReturnValue().SetUndefined();
+        } catch ( nogdb::Error& err ){
+            Nan::ThrowError(err.what());
+        }
+    }
+    else
+    {
+        return Nan::ThrowError(Nan::New("Txn.renameClass() - invalid argument(s)").ToLocalChecked());
+    }
 }
 
 NAN_METHOD(Txn::addProperty) {
-    //TODO
-    info.GetReturnValue().SetUndefined();
+    //TODO not tested yet --Tae
+    
+    if(info.Length() == 3 && info[0]->IsString() && info[1]->IsString() && info[2]->IsString()){
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+        nogdb::TxnMode mode = txn->base->getTxnMode();
+        if(mode!=nogdb::TxnMode::READ_WRITE)
+            Nan::ThrowError("Must be READ_WRITE mode to add class property.");
+
+        std::string className = *Nan::Utf8String(info[0]->ToString());
+        std::string propName = *Nan::Utf8String(info[1]->ToString());
+        std::string type = *Nan::Utf8String(info[2]->ToString());
+
+        nogdb::PropertyType propertyType = nogdb::PropertyType::TEXT;
+        if(type=="TINYINT")                 propertyType = nogdb::PropertyType::TINYINT;
+        else if(type=="UNSIGNED_TINYINT")   propertyType = nogdb::PropertyType::UNSIGNED_TINYINT;
+        else if(type=="SMALLINT")           propertyType = nogdb::PropertyType::SMALLINT;
+        else if(type=="UNSIGNED_SMALLINT")  propertyType = nogdb::PropertyType::UNSIGNED_SMALLINT;
+        else if(type=="INTEGER")            propertyType = nogdb::PropertyType::INTEGER;
+        else if(type=="UNSIGNED_INTEGER")   propertyType = nogdb::PropertyType::UNSIGNED_INTEGER;
+        else if(type=="BIGINT")             propertyType = nogdb::PropertyType::BIGINT;
+        else if(type=="UNSIGNED_BIGINT")    propertyType = nogdb::PropertyType::UNSIGNED_BIGINT;
+        else if(type=="TEXT")               propertyType = nogdb::PropertyType::TEXT;
+        else if(type=="REAL")               propertyType = nogdb::PropertyType::REAL;
+        else if(type=="BLOB")               propertyType = nogdb::PropertyType::BLOB;
+        else Nan::ThrowError("propertyType Invalid");
+
+        try {
+            nogdb::PropertyDescriptor pdesc = txn->base->addProperty(className,propName,propertyType);
+            info.GetReturnValue().Set(v8PropertyDescriptor(pdesc));
+        } catch ( nogdb::Error& err ){
+            Nan::ThrowError(err.what());
+        }
+    }
+    else
+    {
+        return Nan::ThrowError(Nan::New("Txn.addProperty() - invalid argument(s)").ToLocalChecked());
+    }
 }
 
 NAN_METHOD(Txn::renameProperty) {
-    //TODO
-    info.GetReturnValue().SetUndefined();
+    //TODO not tested yet --Tae
+    
+    if(info.Length() == 3 && info[0]->IsString() && info[1]->IsString() && info[2]->IsString()){
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+        nogdb::TxnMode mode = txn->base->getTxnMode();
+        if(mode!=nogdb::TxnMode::READ_WRITE)
+            Nan::ThrowError("Must be READ_WRITE mode to rename class property.");
+
+        std::string className = *Nan::Utf8String(info[0]->ToString());
+        std::string oldPropName = *Nan::Utf8String(info[1]->ToString());
+        std::string newPropName = *Nan::Utf8String(info[2]->ToString());
+
+        try {
+            txn->base->renameProperty(className,oldPropName,newPropName);
+            info.GetReturnValue().SetUndefined();
+        } catch ( nogdb::Error& err ){
+            Nan::ThrowError(err.what());
+        }
+    }
+    else
+    {
+        return Nan::ThrowError(Nan::New("Txn.renameProperty() - invalid argument(s)").ToLocalChecked());
+    }
 }
 
 NAN_METHOD(Txn::dropProperty) {
-    //TODO
-    info.GetReturnValue().SetUndefined();
+    //TODO not tested yet --Tae
+    
+    if(info.Length() == 2 && info[0]->IsString() && info[1]->IsString()){
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+        nogdb::TxnMode mode = txn->base->getTxnMode();
+        if(mode!=nogdb::TxnMode::READ_WRITE)
+            Nan::ThrowError("Must be READ_WRITE mode to drop class property.");
+
+        std::string className = *Nan::Utf8String(info[0]->ToString());
+        std::string propName = *Nan::Utf8String(info[1]->ToString());
+
+        try {
+            txn->base->dropProperty(className,propName);
+            info.GetReturnValue().SetUndefined();
+        } catch ( nogdb::Error& err ){
+            Nan::ThrowError(err.what());
+        }
+    }
+    else
+    {
+        return Nan::ThrowError(Nan::New("Txn.dropProperty() - invalid argument(s)").ToLocalChecked());
+    }
 }
 
 NAN_METHOD(Txn::addIndex) {
-    //TODO
-    info.GetReturnValue().SetUndefined();
+    //TODO not tested yet --Tae
+
+    if(info.Length() == 3 && info[0]->IsString() && info[1]->IsString() && info[2]->IsBoolean()){
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+        nogdb::TxnMode mode = txn->base->getTxnMode();
+        if(mode!=nogdb::TxnMode::READ_WRITE)
+            Nan::ThrowError("Must be READ_WRITE mode to add index.");
+
+        std::string className = *Nan::Utf8String(info[0]->ToString());
+        std::string propName = *Nan::Utf8String(info[1]->ToString());
+        bool isUnique = info[2]->BooleanValue();
+
+        try {
+            nogdb::IndexDescriptor idesc = txn->base->addIndex(className,propName,isUnique);
+            info.GetReturnValue().Set(v8IndexDescriptor(idesc));
+        } catch ( nogdb::Error& err ){
+            Nan::ThrowError(err.what());
+        }
+    }
+    else
+    {
+        return Nan::ThrowError(Nan::New("Txn.addIndex() - invalid argument(s)").ToLocalChecked());
+    }
 }
 
 NAN_METHOD(Txn::dropIndex) {
-    //TODO
-    info.GetReturnValue().SetUndefined();
+    //TODO not tested yet --Tae
+
+    if(info.Length() == 2 && info[0]->IsString() && info[1]->IsString()){
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+        nogdb::TxnMode mode = txn->base->getTxnMode();
+        if(mode!=nogdb::TxnMode::READ_WRITE)
+            Nan::ThrowError("Must be READ_WRITE mode to drop index.");
+
+        std::string className = *Nan::Utf8String(info[0]->ToString());
+        std::string propName = *Nan::Utf8String(info[1]->ToString());
+
+        try {
+            txn->base->dropIndex(className,propName);
+            info.GetReturnValue().SetUndefined();
+        } catch ( nogdb::Error& err ){
+            Nan::ThrowError(err.what());
+        }
+    }
+    else
+    {
+        return Nan::ThrowError(Nan::New("Txn.dropIndex() - invalid argument(s)").ToLocalChecked());
+    }
 }
 
 NAN_METHOD(Txn::getDbInfo) {
-    //TODO
-    info.GetReturnValue().SetUndefined();
+    //TODO not tested yet --Tae
+
+    Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+
+    try {
+        nogdb::DbInfo dbInfo = txn->base->getDbInfo();
+        info.GetReturnValue().Set(v8DBInfo(dbInfo));
+    } catch ( nogdb::Error& err ){
+        Nan::ThrowError(err.what());
+    }
 }
 
 NAN_METHOD(Txn::getClasses) {
-    //TODO
-    info.GetReturnValue().SetUndefined();
+    //TODO not tested yet --Tae
+
+    Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+
+    try {
+        std::vector<nogdb::ClassDescriptor> classes = txn->base->getClasses();
+        v8::Local<v8::Array> retval = Nan::New<v8::Array>(classes.size());
+        int i = 0;
+        for(std::vector<nogdb::ClassDescriptor>::iterator it = classes.begin(); it != classes.end(); ++it)
+        {
+            Nan::Set(retval, i, v8ClassDescriptor(*it));
+            i++;
+        }
+        info.GetReturnValue().Set(retval);
+    } catch ( nogdb::Error& err ){
+        Nan::ThrowError(err.what());
+    }
 }
 
 NAN_METHOD(Txn::getPropertiesByClassName) {
-    //TODO
-    info.GetReturnValue().SetUndefined();
+    //TODO not tested yet --Tae
+
+    if(info.Length() == 1 && info[0]->IsString()){
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+
+        std::string className = *Nan::Utf8String(info[0]->ToString());
+
+        try {
+            std::vector<nogdb::PropertyDescriptor> props = txn->base->getProperties(className);
+            v8::Local<v8::Array> retval = Nan::New<v8::Array>(props.size());
+            int i = 0;
+            for(std::vector<nogdb::PropertyDescriptor>::iterator it = props.begin(); it != props.end(); ++it)
+            {
+                Nan::Set(retval, i, v8PropertyDescriptor(*it));
+                i++;
+            }
+            info.GetReturnValue().Set(retval);
+        } catch ( nogdb::Error& err ){
+            Nan::ThrowError(err.what());
+        }
+    }
+    else
+    {
+        return Nan::ThrowError(Nan::New("Txn.getPropertiesByClassName() - invalid argument(s)").ToLocalChecked());
+    }
+    
 }
 
 NAN_METHOD(Txn::getPropertiesByClassDescriptor) {
-    //TODO
-    info.GetReturnValue().SetUndefined();
+    //TODO not tested yet --Tae
+    if (info.Length() == 1 && info[0]->IsObject()){
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+
+        v8::Local<v8::Object> ClassDescIn = info[0]->ToObject();
+        
+        nogdb::ClassDescriptor classDesc = toClassDescriptor(ClassDescIn);
+
+        std::vector<nogdb::PropertyDescriptor> props = txn->base->getProperties(classDesc);
+
+        v8::Local<v8::Array> retval = Nan::New<v8::Array>(props.size());
+        int i = 0;
+        for(std::vector<nogdb::PropertyDescriptor>::iterator it = props.begin(); it != props.end(); ++it)
+        {
+            Nan::Set(retval, i, v8PropertyDescriptor(*it));
+            i++;
+        }
+        info.GetReturnValue().Set(retval);
+    }
+    else
+    {
+        return Nan::ThrowError(Nan::New("Txn.getPropertiesByClassDescriptor() - invalid argument(s)").ToLocalChecked());
+    }
 }
 
 NAN_METHOD(Txn::getClassByName) {
-    //TODO
-    info.GetReturnValue().SetUndefined();
+    //TODO not tested yet --Tae
+
+    if(info.Length() == 1 && info[0]->IsString()){
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+
+        std::string className = *Nan::Utf8String(info[0]->ToString());
+
+        try {
+            nogdb::ClassDescriptor classDesc = txn->base->getClass(className);
+            info.GetReturnValue().Set(v8ClassDescriptor(classDesc));
+        } catch ( nogdb::Error& err ){
+            Nan::ThrowError(err.what());
+        }
+    }
+    else
+    {
+        return Nan::ThrowError(Nan::New("Txn.getClassByName() - invalid argument(s)").ToLocalChecked());
+    }
 }
 
 NAN_METHOD(Txn::getClassById) {
-    //TODO
-    info.GetReturnValue().SetUndefined();
+    //TODO not tested yet --Tae
+    
+    if (info.Length() != 1){
+        return Nan::ThrowError(Nan::New("Txn.getClassById() - invalid argument(s)").ToLocalChecked());
+    } else if (info[0]->IsNumber()){
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+        unsigned int id = info[0]->Uint32Value();
+        nogdb::ClassId *nogId = new nogdb::ClassId(id);
+        nogdb::ClassDescriptor classDesc = txn->base->getClass(*nogId);
+        info.GetReturnValue().Set(v8ClassDescriptor(classDesc));
+    } else {
+        return Nan::ThrowError(Nan::New("Txn.getClassById() - invalid argument(s)").ToLocalChecked());
+    }
 }
 
 NAN_METHOD(Txn::getProperty) {
-    //TODO
-    info.GetReturnValue().SetUndefined();
+    //TODO not tested yet --Tae
+    
+    if(info.Length() == 2 && info[0]->IsString() && info[1]->IsString()){
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+
+        std::string className = *Nan::Utf8String(info[0]->ToString());
+        std::string propName = *Nan::Utf8String(info[1]->ToString());
+
+        try {
+            nogdb::PropertyDescriptor propDesc = txn->base->getProperty(className,propName);
+            info.GetReturnValue().Set(v8PropertyDescriptor(propDesc));
+        } catch ( nogdb::Error& err ){
+            Nan::ThrowError(err.what());
+        }
+    }
+    else
+    {
+        return Nan::ThrowError(Nan::New("Txn.getProperty() - invalid argument(s)").ToLocalChecked());
+    }
 }
 
 NAN_METHOD(Txn::getIndex) {
-    //TODO
-    info.GetReturnValue().SetUndefined();
+    //TODO not tested yet --Tae
+    
+    if(info.Length() == 2 && info[0]->IsString() && info[1]->IsString()){
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+
+        std::string className = *Nan::Utf8String(info[0]->ToString());
+        std::string propName = *Nan::Utf8String(info[1]->ToString());
+
+        try {
+            nogdb::IndexDescriptor indexDesc = txn->base->getIndex(className,propName);
+            info.GetReturnValue().Set(v8IndexDescriptor(indexDesc));
+        } catch ( nogdb::Error& err ){
+            Nan::ThrowError(err.what());
+        }
+    }
+    else
+    {
+        return Nan::ThrowError(Nan::New("Txn.getIndex() - invalid argument(s)").ToLocalChecked());
+    }
 }
 
 NAN_METHOD(Txn::fetchRecord) {
-    //TODO
-    info.GetReturnValue().SetUndefined();
+    //TODO not tested yet --Tae
+
+    if(info.Length() == 1 && info[0]->IsObject()){
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+
+        nogdb::RecordDescriptor recordDesc = toRecordDescriptor(info[0]->ToObject());
+
+        try {
+            nogdb::Record rec = txn->base->fetchRecord(recordDesc);
+            info.GetReturnValue().Set(v8Record(rec));
+        } catch ( nogdb::Error& err ){
+            Nan::ThrowError(err.what());
+        }
+    } else {
+        return Nan::ThrowError(Nan::New("Txn.fetchRecord() - invalid argument(s)").ToLocalChecked());
+    }
 }
 
 NAN_METHOD(Txn::addVertex) {
-    //TODO
-    info.GetReturnValue().SetUndefined();
+    //TODO not tested yet --Tae
+    v8::Local<v8::FunctionTemplate> recordType = Nan::New<v8::FunctionTemplate>(Record::constructor);
+    
+    if (info.Length() == 2 && info[0]->IsString() && recordType->HasInstance(info[1]->ToObject())){
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+
+        nogdb::TxnMode mode = txn->base->getTxnMode();
+        if(mode!=nogdb::TxnMode::READ_WRITE) Nan::ThrowError("Must be READ_WRITE mode to add vertex.");
+
+        std::string className = *Nan::Utf8String(info[0]->ToString());
+        Record *record = Nan::ObjectWrap::Unwrap<Record>(info[1]->ToObject());
+        try {
+            nogdb::RecordDescriptor recDesc = txn->base->addVertex(className, record->base);
+            info.GetReturnValue().Set(v8RecordDescriptor(recDesc));
+        } catch ( nogdb::Error& err ){
+            Nan::ThrowError(err.what());
+        }
+    } else {
+        return Nan::ThrowError(Nan::New("Txn.addVertex() - invalid argument(s)").ToLocalChecked());
+    }
 }
 
 NAN_METHOD(Txn::addEdge) {
-    //TODO
-    info.GetReturnValue().SetUndefined();
+    //TODO not tested yet --Tae
+    v8::Local<v8::FunctionTemplate> recordType = Nan::New<v8::FunctionTemplate>(Record::constructor);
+
+    if (info.Length() == 4 && info[0]->IsString()
+                           && info[1]->IsObject()
+                           && info[2]->IsObject()
+                           && recordType->HasInstance(info[3]->ToObject()))
+    {
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+
+        nogdb::TxnMode mode = txn->base->getTxnMode();
+        if(mode!=nogdb::TxnMode::READ_WRITE) Nan::ThrowError("Must be READ_WRITE mode to add edge.");
+
+        std::string className = *Nan::Utf8String(info[0]->ToString());
+        nogdb::RecordDescriptor srcRecDesc = toRecordDescriptor(info[1]->ToObject());
+        nogdb::RecordDescriptor dstRecDesc = toRecordDescriptor(info[2]->ToObject());
+        Record *record = Nan::ObjectWrap::Unwrap<Record>(info[3]->ToObject());
+
+        try {
+            nogdb::RecordDescriptor recDesc = txn->base->addEdge(className, srcRecDesc, dstRecDesc, record->base);
+            info.GetReturnValue().Set(v8RecordDescriptor(recDesc));
+        } catch ( nogdb::Error& err ){
+            Nan::ThrowError(err.what());
+        }
+    } else {
+        return Nan::ThrowError(Nan::New("Txn.addEdge() - invalid argument(s)").ToLocalChecked());
+    }
 }
 
 NAN_METHOD(Txn::update) {
-    //TODO
-    info.GetReturnValue().SetUndefined();
+    //TODO not tested yet --Tae
+    v8::Local<v8::FunctionTemplate> recordType = Nan::New<v8::FunctionTemplate>(Record::constructor);
+
+    if (info.Length() == 2 && info[0]->IsObject() && recordType->HasInstance(info[1]->ToObject()) ){
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+
+        nogdb::TxnMode mode = txn->base->getTxnMode();
+        if(mode!=nogdb::TxnMode::READ_WRITE) Nan::ThrowError("Must be READ_WRITE mode to update.");
+
+        nogdb::RecordDescriptor recDesc = toRecordDescriptor(info[0]->ToObject());
+        Record *record = Nan::ObjectWrap::Unwrap<Record>(info[1]->ToObject());
+
+        try {
+            txn->base->update(recDesc,record->base);
+            info.GetReturnValue().SetUndefined();
+        } catch ( nogdb::Error& err ){
+            Nan::ThrowError(err.what());
+        }
+    } else {
+        return Nan::ThrowError(Nan::New("Txn.update() - invalid argument(s)").ToLocalChecked());
+    }
 }
 
 NAN_METHOD(Txn::updateSrc) {
-    //TODO
-    info.GetReturnValue().SetUndefined();
+    //TODO not tested yet --Tae
+    if (info.Length() == 2 && info[0]->IsObject() && info[1]->IsObject() ){
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+
+        nogdb::TxnMode mode = txn->base->getTxnMode();
+        if(mode!=nogdb::TxnMode::READ_WRITE) Nan::ThrowError("Must be READ_WRITE mode to updateSrc.");
+
+        nogdb::RecordDescriptor edgeRecDesc = toRecordDescriptor(info[0]->ToObject());
+        nogdb::RecordDescriptor newSrcRecDesc = toRecordDescriptor(info[1]->ToObject());
+
+        try {
+            txn->base->updateSrc(edgeRecDesc, newSrcRecDesc);
+            info.GetReturnValue().SetUndefined();
+        } catch ( nogdb::Error& err ){
+            Nan::ThrowError(err.what());
+        }
+    } else {
+        return Nan::ThrowError(Nan::New("Txn.updateSrc() - invalid argument(s)").ToLocalChecked());
+    }
 }
 
 NAN_METHOD(Txn::updateDst) {
-    //TODO
-    info.GetReturnValue().SetUndefined();
+    //TODO not tested yet --Tae
+    if (info.Length() == 2 && info[0]->IsObject() && info[1]->IsObject() ){
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+
+        nogdb::TxnMode mode = txn->base->getTxnMode();
+        if(mode!=nogdb::TxnMode::READ_WRITE) Nan::ThrowError("Must be READ_WRITE mode to updateDst.");
+
+        nogdb::RecordDescriptor edgeRecDesc = toRecordDescriptor(info[0]->ToObject());
+        nogdb::RecordDescriptor newDstRecDesc = toRecordDescriptor(info[1]->ToObject());
+
+        try {
+            txn->base->updateDst(edgeRecDesc, newDstRecDesc);
+            info.GetReturnValue().SetUndefined();
+        } catch ( nogdb::Error& err ){
+            Nan::ThrowError(err.what());
+        }
+    } else {
+        return Nan::ThrowError(Nan::New("Txn.updateDst() - invalid argument(s)").ToLocalChecked());
+    }
 }
 
 NAN_METHOD(Txn::remove) {
-    //TODO
-    info.GetReturnValue().SetUndefined();
+    //TODO not tested yet --Tae
+    if (info.Length() == 1 && info[0]->IsObject()){
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+
+        nogdb::TxnMode mode = txn->base->getTxnMode();
+        if(mode!=nogdb::TxnMode::READ_WRITE) Nan::ThrowError("Must be READ_WRITE mode to remove.");
+
+        nogdb::RecordDescriptor recDesc = toRecordDescriptor(info[0]->ToObject());
+
+        try {
+            txn->base->remove(recDesc);
+            info.GetReturnValue().SetUndefined();
+        } catch ( nogdb::Error& err ){
+            Nan::ThrowError(err.what());
+        }
+    } else {
+        return Nan::ThrowError(Nan::New("Txn.remove() - invalid argument(s)").ToLocalChecked());
+    }
 }
 
 NAN_METHOD(Txn::removeAll) {
-    //TODO
-    info.GetReturnValue().SetUndefined();
+    //TODO not tested yet --Tae
+    if (info.Length() == 1 && info[0]->IsString()){
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+
+        nogdb::TxnMode mode = txn->base->getTxnMode();
+        if(mode!=nogdb::TxnMode::READ_WRITE) Nan::ThrowError("Must be READ_WRITE mode to removeAll.");
+
+        std::string className = *Nan::Utf8String(info[0]->ToString());
+
+        try {
+            txn->base->removeAll(className);
+            info.GetReturnValue().SetUndefined();
+        } catch ( nogdb::Error& err ){
+            Nan::ThrowError(err.what());
+        }
+    } else {
+        return Nan::ThrowError(Nan::New("Txn.removeAll() - invalid argument(s)").ToLocalChecked());
+    }
 }
 
 NAN_METHOD(Txn::find) {
     //TODO
-    info.GetReturnValue().SetUndefined();
+    // if (info.Length() == 1 && info[0]->IsString()){
+    //     Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+
+    //     std::string className = *Nan::Utf8String(info[0]->ToString());
+
+    //     try {
+    //         nogdb::FindOperationBuilder builder = txn->base->find(className);
+    //         info.GetReturnValue().Set(result);
+    //     } catch ( nogdb::Error& err ){
+    //         Nan::ThrowError(err.what());
+    //     }
+    // } else {
+    //     return Nan::ThrowError(Nan::New("Txn.removeAll() - invalid argument(s)").ToLocalChecked());
+    // }
 }
 
 NAN_METHOD(Txn::findSubClassOf) {
@@ -313,18 +775,58 @@ NAN_METHOD(Txn::findEdge) {
 }
 
 NAN_METHOD(Txn::fetchSrc) {
-    //TODO
-    info.GetReturnValue().SetUndefined();
+    //TODO not tested yet --Tae
+
+    if (info.Length() == 1 && info[0]->IsObject()){
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+
+        nogdb::RecordDescriptor recDesc = toRecordDescriptor(info[0]->ToObject());
+
+        try {
+            nogdb::Result result = txn->base->fetchSrc(recDesc);
+            info.GetReturnValue().Set(v8Result(result));
+        } catch ( nogdb::Error& err ){
+            Nan::ThrowError(err.what());
+        }
+    } else {
+        return Nan::ThrowError(Nan::New("Txn.fetchSrc() - invalid argument(s)").ToLocalChecked());
+    }
 }
 
 NAN_METHOD(Txn::fetchDst) {
-    //TODO
-    info.GetReturnValue().SetUndefined();
+    //TODO not tested yet --Tae
+
+    if (info.Length() == 1 && info[0]->IsObject()){
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+
+        nogdb::RecordDescriptor recDesc = toRecordDescriptor(info[0]->ToObject());
+
+        try {
+            nogdb::Result result = txn->base->fetchDst(recDesc);
+            info.GetReturnValue().Set(v8Result(result));
+        } catch ( nogdb::Error& err ){
+            Nan::ThrowError(err.what());
+        }
+    } else {
+        return Nan::ThrowError(Nan::New("Txn.fetchDst() - invalid argument(s)").ToLocalChecked());
+    }
 }
 
 NAN_METHOD(Txn::fetchSrcDst) {
-    //TODO
-    info.GetReturnValue().SetUndefined();
+    if (info.Length() == 1 && info[0]->IsObject()){
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+
+        nogdb::RecordDescriptor recDesc = toRecordDescriptor(info[0]->ToObject());
+
+        try {
+            nogdb::ResultSet resultSet = txn->base->fetchSrcDst(recDesc);
+            info.GetReturnValue().Set(v8ResultSet(resultSet));
+        } catch ( nogdb::Error& err ){
+            Nan::ThrowError(err.what());
+        }
+    } else {
+        return Nan::ThrowError(Nan::New("Txn.fetchSrcDst() - invalid argument(s)").ToLocalChecked());
+    }
 }
 
 NAN_METHOD(Txn::traverseIn) {
