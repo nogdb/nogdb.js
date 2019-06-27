@@ -775,8 +775,22 @@ NAN_METHOD(Txn::findEdge) {
 }
 
 NAN_METHOD(Txn::fetchSrc) {
-    //TODO
-    info.GetReturnValue().SetUndefined();
+    //TODO not tested yet --Tae
+
+    if (info.Length() == 1 && info[0]->IsObject()){
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+
+        nogdb::RecordDescriptor recDesc = toRecordDescriptor(info[0]->ToObject());
+
+        try {
+            nogdb::Result result = txn->base->fetchSrc(recDesc);
+            info.GetReturnValue().Set(v8Result(result));
+        } catch ( nogdb::Error& err ){
+            Nan::ThrowError(err.what());
+        }
+    } else {
+        return Nan::ThrowError(Nan::New("Txn.fetchSrc() - invalid argument(s)").ToLocalChecked());
+    }
 }
 
 NAN_METHOD(Txn::fetchDst) {
