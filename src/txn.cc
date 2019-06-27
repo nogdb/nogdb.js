@@ -577,8 +577,33 @@ NAN_METHOD(Txn::addVertex) {
 }
 
 NAN_METHOD(Txn::addEdge) {
-    //TODO
-    info.GetReturnValue().SetUndefined();
+    //TODO not tested yet --Tae
+    v8::Local<v8::FunctionTemplate> recordType = Nan::New<v8::FunctionTemplate>(Record::constructor);
+
+    if (info.Length() == 4 && info[0]->IsString()
+                           && info[1]->IsObject()
+                           && info[2]->IsObject()
+                           && recordType->HasInstance(info[3]->ToObject()))
+    {
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+
+        nogdb::TxnMode mode = txn->base->getTxnMode();
+        if(mode!=nogdb::TxnMode::READ_WRITE) Nan::ThrowError("Must be READ_WRITE mode to add edge.");
+
+        std::string className = *Nan::Utf8String(info[0]->ToString());
+        nogdb::RecordDescriptor srcRecDesc = toRecordDescriptor(info[1]->ToObject());
+        nogdb::RecordDescriptor dstRecDesc = toRecordDescriptor(info[2]->ToObject());
+        Record *record = Nan::ObjectWrap::Unwrap<Record>(info[3]->ToObject());
+
+        try {
+            nogdb::RecordDescriptor recDesc = txn->base->addEdge(className, srcRecDesc, dstRecDesc, record->base);
+            info.GetReturnValue().Set(v8RecordDescriptor(recDesc));
+        } catch ( nogdb::Error& err ){
+            Nan::ThrowError(err.what());
+        }
+    } else {
+        return Nan::ThrowError(Nan::New("Txn.addEdge() - invalid argument(s)").ToLocalChecked());
+    }
 }
 
 NAN_METHOD(Txn::update) {
