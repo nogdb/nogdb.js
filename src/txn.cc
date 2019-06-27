@@ -6,6 +6,7 @@
 #include "txn.hpp"
 #include "toV8type.hpp"
 #include "convertInput.hpp"
+#include "record.hpp"
 
 Nan::Persistent<v8::FunctionTemplate> Txn::constructor;
 
@@ -554,23 +555,25 @@ NAN_METHOD(Txn::fetchRecord) {
 
 NAN_METHOD(Txn::addVertex) {
     //TODO not tested yet --Tae
-
-    if(info.Length() == 2 && info[0]->IsString() && info[1]->IsObject()){
+    v8::Local<v8::FunctionTemplate> recordType = Nan::New<v8::FunctionTemplate>(Record::constructor);
+    
+    if (info.Length() == 2 && info[0]->IsString() && recordType->HasInstance(info[1]->ToObject())){
         Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
 
         nogdb::TxnMode mode = txn->base->getTxnMode();
-        if(mode!=nogdb::TxnMode::READ_WRITE)
-            Nan::ThrowError("Must be READ_WRITE mode to add vertex.");
+        if(mode!=nogdb::TxnMode::READ_WRITE) Nan::ThrowError("Must be READ_WRITE mode to add vertex.");
 
         std::string className = *Nan::Utf8String(info[0]->ToString());
-
-        nogdb::Record newRec = new nogdb::Record();
+        Record *record = Nan::ObjectWrap::Unwrap<Record>(info[1]->ToObject());
+        try {
+            nogdb::RecordDescriptor recDesc = txn->base->addVertex(className, record->base);
+            info.GetReturnValue().Set(v8RecordDescriptor(recDesc));
+        } catch ( nogdb::Error& err ){
+            Nan::ThrowError(err.what());
+        }
     } else {
         return Nan::ThrowError(Nan::New("Txn.addVertex() - invalid argument(s)").ToLocalChecked());
     }
-
-
-    info.GetReturnValue().SetUndefined();
 }
 
 NAN_METHOD(Txn::addEdge) {
