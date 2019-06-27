@@ -170,8 +170,28 @@ NAN_METHOD(Txn::addClass) {
 }
 
 NAN_METHOD(Txn::addSubClassOf) {
-    //TODO
-    info.GetReturnValue().SetUndefined();
+    //TODO not tested yet --Tae
+
+    if (info.Length() == 2 && info[0]->IsString() && info[1]->IsString()){
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+        nogdb::TxnMode mode = txn->base->getTxnMode();
+        if(mode!=nogdb::TxnMode::READ_WRITE)
+            Nan::ThrowError("Must be READ_WRITE mode to add sub class.");
+
+        std::string superClass = *Nan::Utf8String(info[0]->ToString());
+        std::string className = *Nan::Utf8String(info[1]->ToString());
+
+        try {
+            nogdb::ClassDescriptor classDesc = txn->base->addSubClassOf(superClass, className);
+            info.GetReturnValue().Set(v8ClassDescriptor(classDesc));
+        } catch ( nogdb::Error& err ){
+            Nan::ThrowError(err.what());
+        }
+    }
+    else
+    {
+        return Nan::ThrowError(Nan::New("Txn.addSubClassOf() - invalid argument(s)").ToLocalChecked());
+    }
 }
 
 NAN_METHOD(Txn::dropClass) {
@@ -718,7 +738,20 @@ NAN_METHOD(Txn::removeAll) {
 
 NAN_METHOD(Txn::find) {
     //TODO
-    info.GetReturnValue().SetUndefined();
+    // if (info.Length() == 1 && info[0]->IsString()){
+    //     Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+
+    //     std::string className = *Nan::Utf8String(info[0]->ToString());
+
+    //     try {
+    //         nogdb::FindOperationBuilder builder = txn->base->find(className);
+    //         info.GetReturnValue().Set(result);
+    //     } catch ( nogdb::Error& err ){
+    //         Nan::ThrowError(err.what());
+    //     }
+    // } else {
+    //     return Nan::ThrowError(Nan::New("Txn.removeAll() - invalid argument(s)").ToLocalChecked());
+    // }
 }
 
 NAN_METHOD(Txn::findSubClassOf) {
