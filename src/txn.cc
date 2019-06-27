@@ -631,18 +631,68 @@ NAN_METHOD(Txn::update) {
 }
 
 NAN_METHOD(Txn::updateSrc) {
-    //TODO
-    info.GetReturnValue().SetUndefined();
+    //TODO not tested yet --Tae
+    if (info.Length() == 2 && info[0]->IsObject() && info[1]->IsObject() ){
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+
+        nogdb::TxnMode mode = txn->base->getTxnMode();
+        if(mode!=nogdb::TxnMode::READ_WRITE) Nan::ThrowError("Must be READ_WRITE mode to updateSrc.");
+
+        nogdb::RecordDescriptor edgeRecDesc = toRecordDescriptor(info[0]->ToObject());
+        nogdb::RecordDescriptor newSrcRecDesc = toRecordDescriptor(info[1]->ToObject());
+
+        try {
+            txn->base->updateSrc(edgeRecDesc, newSrcRecDesc);
+            info.GetReturnValue().SetUndefined();
+        } catch ( nogdb::Error& err ){
+            Nan::ThrowError(err.what());
+        }
+    } else {
+        return Nan::ThrowError(Nan::New("Txn.updateSrc() - invalid argument(s)").ToLocalChecked());
+    }
 }
 
 NAN_METHOD(Txn::updateDst) {
-    //TODO
-    info.GetReturnValue().SetUndefined();
+    //TODO not tested yet --Tae
+    if (info.Length() == 2 && info[0]->IsObject() && info[1]->IsObject() ){
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+
+        nogdb::TxnMode mode = txn->base->getTxnMode();
+        if(mode!=nogdb::TxnMode::READ_WRITE) Nan::ThrowError("Must be READ_WRITE mode to updateDst.");
+
+        nogdb::RecordDescriptor edgeRecDesc = toRecordDescriptor(info[0]->ToObject());
+        nogdb::RecordDescriptor newDstRecDesc = toRecordDescriptor(info[1]->ToObject());
+
+        try {
+            txn->base->updateDst(edgeRecDesc, newDstRecDesc);
+            info.GetReturnValue().SetUndefined();
+        } catch ( nogdb::Error& err ){
+            Nan::ThrowError(err.what());
+        }
+    } else {
+        return Nan::ThrowError(Nan::New("Txn.updateDst() - invalid argument(s)").ToLocalChecked());
+    }
 }
 
 NAN_METHOD(Txn::remove) {
-    //TODO
-    info.GetReturnValue().SetUndefined();
+    //TODO not tested yet --Tae
+    if (info.Length() == 1 && info[0]->IsObject()){
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+
+        nogdb::TxnMode mode = txn->base->getTxnMode();
+        if(mode!=nogdb::TxnMode::READ_WRITE) Nan::ThrowError("Must be READ_WRITE mode to remove.");
+
+        nogdb::RecordDescriptor recDesc = toRecordDescriptor(info[0]->ToObject());
+
+        try {
+            txn->base->remove(recDesc);
+            info.GetReturnValue().SetUndefined();
+        } catch ( nogdb::Error& err ){
+            Nan::ThrowError(err.what());
+        }
+    } else {
+        return Nan::ThrowError(Nan::New("Txn.remove() - invalid argument(s)").ToLocalChecked());
+    }
 }
 
 NAN_METHOD(Txn::removeAll) {
