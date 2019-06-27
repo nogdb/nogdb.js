@@ -794,13 +794,39 @@ NAN_METHOD(Txn::fetchSrc) {
 }
 
 NAN_METHOD(Txn::fetchDst) {
-    //TODO
-    info.GetReturnValue().SetUndefined();
+    //TODO not tested yet --Tae
+
+    if (info.Length() == 1 && info[0]->IsObject()){
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+
+        nogdb::RecordDescriptor recDesc = toRecordDescriptor(info[0]->ToObject());
+
+        try {
+            nogdb::Result result = txn->base->fetchDst(recDesc);
+            info.GetReturnValue().Set(v8Result(result));
+        } catch ( nogdb::Error& err ){
+            Nan::ThrowError(err.what());
+        }
+    } else {
+        return Nan::ThrowError(Nan::New("Txn.fetchDst() - invalid argument(s)").ToLocalChecked());
+    }
 }
 
 NAN_METHOD(Txn::fetchSrcDst) {
-    //TODO
-    info.GetReturnValue().SetUndefined();
+    if (info.Length() == 1 && info[0]->IsObject()){
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+
+        nogdb::RecordDescriptor recDesc = toRecordDescriptor(info[0]->ToObject());
+
+        try {
+            nogdb::ResultSet resultSet = txn->base->fetchSrcDst(recDesc);
+            info.GetReturnValue().Set(v8ResultSet(resultSet));
+        } catch ( nogdb::Error& err ){
+            Nan::ThrowError(err.what());
+        }
+    } else {
+        return Nan::ThrowError(Nan::New("Txn.fetchSrcDst() - invalid argument(s)").ToLocalChecked());
+    }
 }
 
 NAN_METHOD(Txn::traverseIn) {
