@@ -696,8 +696,24 @@ NAN_METHOD(Txn::remove) {
 }
 
 NAN_METHOD(Txn::removeAll) {
-    //TODO
-    info.GetReturnValue().SetUndefined();
+    //TODO not tested yet --Tae
+    if (info.Length() == 1 && info[0]->IsString()){
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+
+        nogdb::TxnMode mode = txn->base->getTxnMode();
+        if(mode!=nogdb::TxnMode::READ_WRITE) Nan::ThrowError("Must be READ_WRITE mode to removeAll.");
+
+        std::string className = *Nan::Utf8String(info[0]->ToString());
+
+        try {
+            txn->base->removeAll(className);
+            info.GetReturnValue().SetUndefined();
+        } catch ( nogdb::Error& err ){
+            Nan::ThrowError(err.what());
+        }
+    } else {
+        return Nan::ThrowError(Nan::New("Txn.removeAll() - invalid argument(s)").ToLocalChecked());
+    }
 }
 
 NAN_METHOD(Txn::find) {
