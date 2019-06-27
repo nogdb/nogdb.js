@@ -607,8 +607,27 @@ NAN_METHOD(Txn::addEdge) {
 }
 
 NAN_METHOD(Txn::update) {
-    //TODO
-    info.GetReturnValue().SetUndefined();
+    //TODO not tested yet --Tae
+    v8::Local<v8::FunctionTemplate> recordType = Nan::New<v8::FunctionTemplate>(Record::constructor);
+
+    if (info.Length() == 2 && info[0]->IsObject() && recordType->HasInstance(info[1]->ToObject()) ){
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+
+        nogdb::TxnMode mode = txn->base->getTxnMode();
+        if(mode!=nogdb::TxnMode::READ_WRITE) Nan::ThrowError("Must be READ_WRITE mode to update.");
+
+        nogdb::RecordDescriptor recDesc = toRecordDescriptor(info[0]->ToObject());
+        Record *record = Nan::ObjectWrap::Unwrap<Record>(info[1]->ToObject());
+
+        try {
+            txn->base->update(recDesc,record->base);
+            info.GetReturnValue().SetUndefined();
+        } catch ( nogdb::Error& err ){
+            Nan::ThrowError(err.what());
+        }
+    } else {
+        return Nan::ThrowError(Nan::New("Txn.update() - invalid argument(s)").ToLocalChecked());
+    }
 }
 
 NAN_METHOD(Txn::updateSrc) {
