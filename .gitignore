@@ -66,3 +66,4 @@ node_modules/*
 package-lock.json
 binding.gyp
 .vscode/
+mygraph.db/
