@@ -12,7 +12,7 @@ public:
     static v8::Local<v8::Object> NewInstance(v8::Local<v8::Value> ctx,v8::Local<v8::Value> mode);
 
 private:
-    explicit Txn(std::shared_ptr<nogdb::Transaction> txn_) : base(txn_) {} ;
+    explicit Txn(const std::shared_ptr<nogdb::Transaction> &txn) : base(txn) {} ;
 
     static NAN_METHOD(New);
     static NAN_METHOD(commit);

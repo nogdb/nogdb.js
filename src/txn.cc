@@ -80,10 +80,12 @@ NAN_METHOD(Txn::New)
         else if(mode=="READ_ONLY")  txnMode = nogdb::TxnMode::READ_ONLY;
         else Nan::ThrowError("Invalid txn mode");
 
-        std::shared_ptr<nogdb::Transaction> baseTxn = std::make_shared<nogdb::Transaction>(ctx->base.beginTxn(txnMode));
-
-        Txn *txn = new Txn(baseTxn);
-        txn->Wrap(info.Holder());
+        try {
+            Txn *txn = new Txn(std::make_shared<nogdb::Transaction>(ctx->base.beginTxn(txnMode)));
+            txn->Wrap(info.Holder());
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        }
         
         info.GetReturnValue().Set(info.Holder());
     }

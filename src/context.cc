@@ -32,10 +32,30 @@ NAN_METHOD(Context::New)
 
     if (info.Length() == 1 && info[0]->IsString())
     {
-        Context *ctx = new Context(*(Nan::Utf8String(info[0]->ToString())));
-        ctx->Wrap(info.Holder());
-
+        try {
+            Context *ctx = new Context(*(Nan::Utf8String(info[0]->ToString())));
+            ctx->Wrap(info.Holder());
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        }
         info.GetReturnValue().Set(info.Holder());
+    }
+    else if (info.Length() == 2 && info[0]->IsString() && info[1]->IsObject())
+    {
+        try {
+            v8::Local<v8::Object> setting = info[1]->ToObject();
+            unsigned int maxDb = Nan::Get(setting, Nan::New<v8::String>("maxDb").ToLocalChecked()).ToLocalChecked()->Uint32Value();
+            unsigned int maxDbSize = Nan::Get(setting, Nan::New<v8::String>("maxDbSize").ToLocalChecked()).ToLocalChecked()->Uint32Value();
+            bool versionEnabled = Nan::Get(setting, Nan::New<v8::String>("versionEnabled").ToLocalChecked()).ToLocalChecked()->BooleanValue();
+            nogdb::ContextSetting ctxSetting = nogdb::ContextSetting();
+            ctxSetting._maxDb = maxDb;
+            ctxSetting._maxDbSize = maxDbSize;
+            ctxSetting._versionEnabled = versionEnabled;
+            Context *ctx = new Context(*(Nan::Utf8String(info[0]->ToString())), ctxSetting);
+            ctx->Wrap(info.Holder());
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        }
     }
     else
     {
@@ -46,7 +66,7 @@ NAN_METHOD(Context::New)
 NAN_METHOD(Context::getMaxDb) {
     Context *ctx = Nan::ObjectWrap::Unwrap<Context>(info.This());
     try {
-        int maxDb =  ctx->base.getMaxDb();
+        int maxDb = ctx->base.getMaxDb();
         info.GetReturnValue().Set(maxDb);    
     } catch ( nogdb::Error& err ) {
         Nan::ThrowError(err.what());
@@ -91,6 +111,18 @@ v8::Local<v8::Object> Context::NewInstance(v8::Local<v8::Value> dbPath) {
     v8::Local<v8::FunctionTemplate> tp1 = Nan::New<v8::FunctionTemplate>(constructor);
     v8::Local<v8::Function> cons = Nan::GetFunction(tp1).ToLocalChecked();
     v8::Local<v8::Object> instance = Nan::NewInstance(cons,argc, argv).ToLocalChecked();
+
+    return scope.Escape(instance);
+}
+
+v8::Local<v8::Object> Context::NewInstance(v8::Local<v8::Value> dbPath, v8::Local<v8::Value> setting) {
+    Nan::EscapableHandleScope scope;
+
+    const unsigned argc = 2;
+    v8::Local<v8::Value> argv[argc] = { dbPath, setting };
+    v8::Local<v8::FunctionTemplate> tp1 = Nan::New<v8::FunctionTemplate>(constructor);
+    v8::Local<v8::Function> cons = Nan::GetFunction(tp1).ToLocalChecked();
+    v8::Local<v8::Object> instance = Nan::NewInstance(cons, argc, argv).ToLocalChecked();
 
     return scope.Escape(instance);
 }

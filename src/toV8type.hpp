@@ -18,3 +18,5 @@ v8::Local<v8::Value> v8ResultSet(nogdb::ResultSet resultSet);
 v8::Local<v8::Value> v8Result(nogdb::Result result);
 
 v8::Local<v8::Value> v8DBInfo(nogdb::DbInfo dbInfo);
+
+v8::Local<v8::Value> v8ContextSetting(nogdb::ContextSetting contextSetting);
