@@ -7,13 +7,6 @@
                 "-Wall",
                 "-fexceptions"
             ],
-            'conditions': [
-                ['OS=="mac"', {
-                  'xcode_settings': {
-                    'GCC_ENABLE_CPP_EXCEPTIONS': 'YES'
-                  }
-                }]
-            ],
             "sources": [
                 "src/init_module.cc",
                 "src/condition.cc",
@@ -28,7 +21,8 @@
                 "<!(node -e \"require('nan')\")"
             ],
             "libraries": [
-                "-lnogdb"
+                "-lnogdb",
+                "-latomic"
             ]
 
         }
