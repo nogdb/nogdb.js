@@ -4,6 +4,7 @@
 
 #include "context.hpp"
 #include "txn.hpp"
+#include "record.hpp"
 #include "toV8type.hpp"
 
 Nan::Persistent<v8::FunctionTemplate> Txn::constructor;
@@ -81,7 +82,7 @@ NAN_METHOD(Txn::New)
         else Nan::ThrowError("Invalid txn mode");
 
         try {
-            Txn *txn = new Txn(std::make_shared<nogdb::Transaction>(ctx->base.beginTxn(txnMode)));
+            Txn *txn = new Txn(ctx->base, txnMode);
             txn->Wrap(info.Holder());
         } catch ( nogdb::Error& err ) {
             Nan::ThrowError(err.what());
@@ -488,43 +489,229 @@ NAN_METHOD(Txn::getIndex) {
 }
 
 NAN_METHOD(Txn::fetchRecord) {
-    //TODO
-    info.GetReturnValue().SetUndefined();
+    if (info.Length() == 1 && info[0]->IsObject())
+    {
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+        v8::Local<v8::Object> recD = info[0]->ToObject();
+        v8::Local<v8::Object> rid = Nan::Get(recD, Nan::New<v8::String>("rid").ToLocalChecked()).ToLocalChecked()->ToObject();
+        unsigned int classId = Nan::Get(rid, Nan::New<v8::String>("classId").ToLocalChecked()).ToLocalChecked()->Uint32Value();
+        unsigned int positionId = Nan::Get(rid, Nan::New<v8::String>("positionId").ToLocalChecked()).ToLocalChecked()->Uint32Value();
+        nogdb::RecordDescriptor recordD(classId,positionId);
+        try {
+            nogdb::Record record = txn->base->fetchRecord(recordD);
+            info.GetReturnValue().Set(v8Record(record));
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        } 
+    }
+    else
+    {
+        return Nan::ThrowError(Nan::New("Txn.fetchRecord() - invalid arugment(s)").ToLocalChecked());
+    }
 }
 
 NAN_METHOD(Txn::addVertex) {
-    //TODO
-    info.GetReturnValue().SetUndefined();
+    v8::Local<v8::FunctionTemplate> recordType = Nan::New<v8::FunctionTemplate>(Record::constructor);
+    if (info.Length() == 2 && info[0]->IsString() && recordType->HasInstance(info[1]->ToObject()))
+    {
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+        std::string className = *Nan::Utf8String(info[0]->ToString());
+        Record *record = Nan::ObjectWrap::Unwrap<Record>(info[1]->ToObject());
+        try {
+            nogdb::RecordDescriptor recD = txn->base->addVertex(className, record->base);
+            info.GetReturnValue().Set(v8RecordDescriptor(recD));
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        }
+    }
+    else if (info.Length() == 1  && info[0]->IsString())
+    {
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+        std::string className = *Nan::Utf8String(info[0]->ToString());
+        try {
+            nogdb::RecordDescriptor recD = txn->base->addVertex(className);
+            info.GetReturnValue().Set(v8RecordDescriptor(recD));
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        }
+    }
+    else
+    {
+        return Nan::ThrowError(Nan::New("Txn.addVertex() - invalid arugment(s)").ToLocalChecked());
+    }
 }
 
 NAN_METHOD(Txn::addEdge) {
-    //TODO
-    info.GetReturnValue().SetUndefined();
+    v8::Local<v8::FunctionTemplate> recordType = Nan::New<v8::FunctionTemplate>(Record::constructor);
+    if (info.Length() == 4  && info[0]->IsString() && info[1]->IsObject()
+                            && info[2]->IsObject() && recordType->HasInstance(info[3]->ToObject()))
+    {
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+        std::string className = *Nan::Utf8String(info[0]->ToString());
+        v8::Local<v8::Object> srcRecD = info[1]->ToObject();
+        v8::Local<v8::Object> srcRid = Nan::Get(srcRecD, Nan::New<v8::String>("rid").ToLocalChecked()).ToLocalChecked()->ToObject();
+        unsigned int srcClassId = Nan::Get(srcRid, Nan::New<v8::String>("classId").ToLocalChecked()).ToLocalChecked()->Uint32Value();
+        unsigned int srcPositionId = Nan::Get(srcRid, Nan::New<v8::String>("positionId").ToLocalChecked()).ToLocalChecked()->Uint32Value();
+        nogdb::RecordDescriptor srcRecordD(srcClassId,srcPositionId);
+
+        v8::Local<v8::Object> dstRecD = info[2]->ToObject();
+        v8::Local<v8::Object> dstRid = Nan::Get(dstRecD, Nan::New<v8::String>("rid").ToLocalChecked()).ToLocalChecked()->ToObject();
+        unsigned int dstClassId = Nan::Get(dstRid, Nan::New<v8::String>("classId").ToLocalChecked()).ToLocalChecked()->Uint32Value();
+        unsigned int dstPositionId = Nan::Get(dstRid, Nan::New<v8::String>("positionId").ToLocalChecked()).ToLocalChecked()->Uint32Value();
+        nogdb::RecordDescriptor dstRecordD(dstClassId,dstPositionId);
+
+        Record *record = Nan::ObjectWrap::Unwrap<Record>(info[3]->ToObject());
+        try {
+            nogdb::RecordDescriptor recD = txn->base->addEdge(className, srcRecordD, dstRecordD, record->base);
+            info.GetReturnValue().Set(v8RecordDescriptor(recD));
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        } 
+    }
+    else if (info.Length() == 3 && info[0]->IsString() && info[1]->IsObject() && info[2]->IsObject())
+    {
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+        std::string className = *Nan::Utf8String(info[0]->ToString());
+        v8::Local<v8::Object> srcRecD = info[1]->ToObject();
+        v8::Local<v8::Object> srcRid = Nan::Get(srcRecD, Nan::New<v8::String>("rid").ToLocalChecked()).ToLocalChecked()->ToObject();
+        unsigned int srcClassId = Nan::Get(srcRid, Nan::New<v8::String>("classId").ToLocalChecked()).ToLocalChecked()->Uint32Value();
+        unsigned int srcPositionId = Nan::Get(srcRid, Nan::New<v8::String>("positionId").ToLocalChecked()).ToLocalChecked()->Uint32Value();
+        nogdb::RecordDescriptor srcRecordD(srcClassId,srcPositionId);
+
+        v8::Local<v8::Object> dstRecD = info[2]->ToObject();
+        v8::Local<v8::Object> dstRid = Nan::Get(dstRecD, Nan::New<v8::String>("rid").ToLocalChecked()).ToLocalChecked()->ToObject();
+        unsigned int dstClassId = Nan::Get(dstRid, Nan::New<v8::String>("classId").ToLocalChecked()).ToLocalChecked()->Uint32Value();
+        unsigned int dstPositionId = Nan::Get(dstRid, Nan::New<v8::String>("positionId").ToLocalChecked()).ToLocalChecked()->Uint32Value();
+        nogdb::RecordDescriptor dstRecordD(dstClassId,dstPositionId);
+
+        try {
+            nogdb::RecordDescriptor recD = txn->base->addEdge(className, srcRecordD, dstRecordD);
+            info.GetReturnValue().Set(v8RecordDescriptor(recD));
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        } 
+    }
+    else
+    {
+        return Nan::ThrowError(Nan::New("Txn.addEdge() - invalid arugment(s)").ToLocalChecked());
+    }
 }
 
 NAN_METHOD(Txn::update) {
-    //TODO
-    info.GetReturnValue().SetUndefined();
+    v8::Local<v8::FunctionTemplate> recordType = Nan::New<v8::FunctionTemplate>(Record::constructor);
+    if (info.Length() == 2 && info[0]->IsObject() && recordType->HasInstance(info[1]->ToObject()))
+    {
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+        v8::Local<v8::Object> recD = info[0]->ToObject();
+        v8::Local<v8::Object> rid = Nan::Get(recD, Nan::New<v8::String>("rid").ToLocalChecked()).ToLocalChecked()->ToObject();
+        unsigned int classId = Nan::Get(rid, Nan::New<v8::String>("classId").ToLocalChecked()).ToLocalChecked()->Uint32Value();
+        unsigned int positionId = Nan::Get(rid, Nan::New<v8::String>("positionId").ToLocalChecked()).ToLocalChecked()->Uint32Value();
+        nogdb::RecordDescriptor recordD(classId,positionId);
+
+        Record *record = Nan::ObjectWrap::Unwrap<Record>(info[2]->ToObject());
+
+        try {
+            txn->base->update(recordD, record->base);
+            info.GetReturnValue().SetUndefined();
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        }         
+    }
+    else
+    {
+        return Nan::ThrowError(Nan::New("Txn.update() - invalid arugment(s)").ToLocalChecked());
+    }
 }
 
 NAN_METHOD(Txn::updateSrc) {
-    //TODO
-    info.GetReturnValue().SetUndefined();
+    if (info.Length() == 2 && info[0]->IsObject() && info[1]->IsObject())
+    {
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+        v8::Local<v8::Object> recD = info[0]->ToObject();
+        v8::Local<v8::Object> rid = Nan::Get(recD, Nan::New<v8::String>("rid").ToLocalChecked()).ToLocalChecked()->ToObject();
+        unsigned int classId = Nan::Get(rid, Nan::New<v8::String>("classId").ToLocalChecked()).ToLocalChecked()->Uint32Value();
+        unsigned int positionId = Nan::Get(rid, Nan::New<v8::String>("positionId").ToLocalChecked()).ToLocalChecked()->Uint32Value();
+        nogdb::RecordDescriptor recordD(classId,positionId);
+
+        v8::Local<v8::Object> srcRecD = info[1]->ToObject();
+        v8::Local<v8::Object> srcRid = Nan::Get(srcRecD, Nan::New<v8::String>("rid").ToLocalChecked()).ToLocalChecked()->ToObject();
+        unsigned int srcClassId = Nan::Get(srcRid, Nan::New<v8::String>("classId").ToLocalChecked()).ToLocalChecked()->Uint32Value();
+        unsigned int srcPositionId = Nan::Get(srcRid, Nan::New<v8::String>("positionId").ToLocalChecked()).ToLocalChecked()->Uint32Value();
+        nogdb::RecordDescriptor srcRecordD(srcClassId,srcPositionId);
+        try {
+            txn->base->updateSrc(recordD, srcRecordD);
+            info.GetReturnValue().SetUndefined();
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        } 
+    }
+    else
+    {
+        return Nan::ThrowError(Nan::New("Txn.updateSrc() - invalid arugment(s)").ToLocalChecked());
+    }
 }
 
 NAN_METHOD(Txn::updateDst) {
-    //TODO
-    info.GetReturnValue().SetUndefined();
+    if (info.Length() == 2 && info[0]->IsObject() && info[1]->IsObject())
+    {
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+        v8::Local<v8::Object> recD = info[0]->ToObject();
+        v8::Local<v8::Object> rid = Nan::Get(recD, Nan::New<v8::String>("rid").ToLocalChecked()).ToLocalChecked()->ToObject();
+        unsigned int classId = Nan::Get(rid, Nan::New<v8::String>("classId").ToLocalChecked()).ToLocalChecked()->Uint32Value();
+        unsigned int positionId = Nan::Get(rid, Nan::New<v8::String>("positionId").ToLocalChecked()).ToLocalChecked()->Uint32Value();
+        nogdb::RecordDescriptor recordD(classId,positionId);
+
+        v8::Local<v8::Object> dstRecD = info[1]->ToObject();
+        v8::Local<v8::Object> dstRid = Nan::Get(dstRecD, Nan::New<v8::String>("rid").ToLocalChecked()).ToLocalChecked()->ToObject();
+        unsigned int dstClassId = Nan::Get(dstRid, Nan::New<v8::String>("classId").ToLocalChecked()).ToLocalChecked()->Uint32Value();
+        unsigned int dstPositionId = Nan::Get(dstRid, Nan::New<v8::String>("positionId").ToLocalChecked()).ToLocalChecked()->Uint32Value();
+        nogdb::RecordDescriptor dstRecordD(dstClassId,dstPositionId);
+        try {
+            txn->base->updateSrc(recordD, dstRecordD);
+            info.GetReturnValue().SetUndefined();
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        } 
+    }
+    else
+    {
+        return Nan::ThrowError(Nan::New("Txn.updateDst() - invalid arugment(s)").ToLocalChecked());
+    }
 }
 
 NAN_METHOD(Txn::remove) {
-    //TODO
-    info.GetReturnValue().SetUndefined();
+    if(info.Length() == 1 && info[0]->IsObject()){
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+        v8::Local<v8::Object> recD = info[0]->ToObject();
+        v8::Local<v8::Object> rid = Nan::Get(recD, Nan::New<v8::String>("rid").ToLocalChecked()).ToLocalChecked()->ToObject();
+        unsigned int classId = Nan::Get(rid, Nan::New<v8::String>("classId").ToLocalChecked()).ToLocalChecked()->Uint32Value();
+        unsigned int positionId = Nan::Get(rid, Nan::New<v8::String>("positionId").ToLocalChecked()).ToLocalChecked()->Uint32Value();
+        nogdb::RecordDescriptor recordD(classId,positionId);
+        try {
+            txn->base->remove(recordD);
+            info.GetReturnValue().SetUndefined();
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        }  
+    }
+    else {
+        return Nan::ThrowError(Nan::New("Txn.remove() - invalid arugment(s)").ToLocalChecked());
+    }
 }
 
 NAN_METHOD(Txn::removeAll) {
-    //TODO
-    info.GetReturnValue().SetUndefined();
+    if(info.Length() == 1 && info[0]->IsString()){
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+        std::string className = *Nan::Utf8String(info[0]->ToString());
+        try {
+            txn->base->removeAll(className);
+            info.GetReturnValue().SetUndefined();
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        } 
+    } else {
+        return Nan::ThrowError(Nan::New("Txn.removeAll() - invalid arugment(s)").ToLocalChecked());
+    }
 }
 
 NAN_METHOD(Txn::find) {

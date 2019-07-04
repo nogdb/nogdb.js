@@ -1,6 +1,7 @@
 #include <memory>
 #include <nan.h>
 #include <nogdb/nogdb.h>
+#include <iostream>
 
 class Txn : public Nan::ObjectWrap {
 public:
@@ -12,7 +13,10 @@ public:
     static v8::Local<v8::Object> NewInstance(v8::Local<v8::Value> ctx,v8::Local<v8::Value> mode);
 
 private:
-    explicit Txn(const std::shared_ptr<nogdb::Transaction> &txn) : base(txn) {} ;
+    explicit Txn(nogdb::Context &ctx, const nogdb::TxnMode &txnMode) 
+    : base(std::make_shared<nogdb::Transaction>(ctx.beginTxn(txnMode))) {
+        std::cout << "generated\n";
+    }
 
     static NAN_METHOD(New);
     static NAN_METHOD(commit);
