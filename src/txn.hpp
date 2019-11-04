@@ -14,8 +14,9 @@ public:
 
 private:
     explicit Txn(nogdb::Context &ctx, const nogdb::TxnMode &txnMode) 
-    : base(std::make_shared<nogdb::Transaction>(ctx.beginTxn(txnMode))) {
-        std::cout << "generated\n";
+    {
+        auto txn = ctx.beginTxn(txnMode);
+        base = std::make_shared<nogdb::Transaction>(std::move(txn));
     }
 
     static NAN_METHOD(New);
@@ -32,7 +33,7 @@ private:
     static NAN_METHOD(dropProperty);
     static NAN_METHOD(addIndex);
     static NAN_METHOD(dropIndex);
-    static NAN_METHOD(getDbInfo);
+    static NAN_METHOD(getDBInfo);
     static NAN_METHOD(getClasses);
     static NAN_METHOD(getPropertiesByClassName);
     static NAN_METHOD(getPropertiesByClassDescriptor);

@@ -44,14 +44,10 @@ NAN_METHOD(Context::New)
     {
         try {
             v8::Local<v8::Object> setting = info[1]->ToObject();
-            unsigned int maxDb = Nan::Get(setting, Nan::New<v8::String>("maxDb").ToLocalChecked()).ToLocalChecked()->Uint32Value();
-            unsigned int maxDbSize = Nan::Get(setting, Nan::New<v8::String>("maxDbSize").ToLocalChecked()).ToLocalChecked()->Uint32Value();
+            unsigned int maxDB = Nan::Get(setting, Nan::New<v8::String>("maxDB").ToLocalChecked()).ToLocalChecked()->Uint32Value();
+            unsigned int maxDBSize = Nan::Get(setting, Nan::New<v8::String>("maxDBSize").ToLocalChecked()).ToLocalChecked()->Uint32Value();
             bool versionEnabled = Nan::Get(setting, Nan::New<v8::String>("versionEnabled").ToLocalChecked()).ToLocalChecked()->BooleanValue();
-            nogdb::ContextSetting ctxSetting = nogdb::ContextSetting();
-            ctxSetting._maxDb = maxDb;
-            ctxSetting._maxDbSize = maxDbSize;
-            ctxSetting._versionEnabled = versionEnabled;
-            Context *ctx = new Context(*(Nan::Utf8String(info[0]->ToString())), ctxSetting);
+            Context *ctx = new Context(*(Nan::Utf8String(info[0]->ToString())), maxDB, maxDBSize, versionEnabled);
             ctx->Wrap(info.Holder());
         } catch ( nogdb::Error& err ) {
             Nan::ThrowError(err.what());
@@ -66,8 +62,8 @@ NAN_METHOD(Context::New)
 NAN_METHOD(Context::getMaxDb) {
     Context *ctx = Nan::ObjectWrap::Unwrap<Context>(info.This());
     try {
-        int maxDb = ctx->base.getMaxDb();
-        info.GetReturnValue().Set(maxDb);    
+        int maxDB = ctx->base.getMaxDB();
+        info.GetReturnValue().Set(maxDB);    
     } catch ( nogdb::Error& err ) {
         Nan::ThrowError(err.what());
     }
@@ -76,8 +72,8 @@ NAN_METHOD(Context::getMaxDb) {
 NAN_METHOD(Context::getMaxDbSize) {
     Context *ctx = Nan::ObjectWrap::Unwrap<Context>(info.This());
     try {
-        int maxDbSize =  ctx->base.getMaxDbSize();
-        info.GetReturnValue().Set(maxDbSize);    
+        int maxDBSize =  ctx->base.getMaxDBSize();
+        info.GetReturnValue().Set(maxDBSize);    
     } catch ( nogdb::Error& err ) {
         Nan::ThrowError(err.what());
     }
@@ -86,7 +82,7 @@ NAN_METHOD(Context::getMaxDbSize) {
 NAN_METHOD(Context::getDbPath) {
     Context *ctx = Nan::ObjectWrap::Unwrap<Context>(info.This());
     try {
-        std::string dbPath =  ctx->base.getDbPath();
+        std::string dbPath =  ctx->base.getDBPath();
         info.GetReturnValue().Set(Nan::New<v8::String>(dbPath).ToLocalChecked());    
     } catch ( nogdb::Error& err ) {
         Nan::ThrowError(err.what());

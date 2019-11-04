@@ -130,7 +130,7 @@ v8::Local<v8::Value> v8Result(nogdb::Result result){
     return retval;
 }
 
-v8::Local<v8::Value> v8DbInfo(nogdb::DbInfo dbInfo){
+v8::Local<v8::Value> v8DBInfo(nogdb::DBInfo dbInfo){
     v8::Local<v8::Object> retval = Nan::New<v8::Object>();
     Nan::Set(retval, Nan::New<v8::String>("dbPath").ToLocalChecked(), Nan::New<v8::String>(dbInfo.dbPath).ToLocalChecked());
     Nan::Set(retval, Nan::New<v8::String>("maxClassId").ToLocalChecked(), Nan::New<v8::Number>(dbInfo.maxClassId));
@@ -139,13 +139,5 @@ v8::Local<v8::Value> v8DbInfo(nogdb::DbInfo dbInfo){
     Nan::Set(retval, Nan::New<v8::String>("numProperty").ToLocalChecked(), Nan::New<v8::Number>(dbInfo.numProperty));
     Nan::Set(retval, Nan::New<v8::String>("maxIndexId").ToLocalChecked(), Nan::New<v8::Number>(dbInfo.maxIndexId));
     Nan::Set(retval, Nan::New<v8::String>("numIndex").ToLocalChecked(), Nan::New<v8::Number>(dbInfo.numIndex));
-    return retval;
-}
-
-v8::Local<v8::Value> v8ContextSetting(nogdb::ContextSetting contextSetting){
-    v8::Local<v8::Object> retval = Nan::New<v8::Object>();
-    Nan::Set(retval, Nan::New<v8::String>("maxDb").ToLocalChecked(), Nan::New<v8::Number>(contextSetting._maxDb));
-    Nan::Set(retval, Nan::New<v8::String>("maxDbSize").ToLocalChecked(), Nan::New<v8::Number>(contextSetting._maxDbSize));
-    Nan::Set(retval, Nan::New<v8::String>("versionEnabled").ToLocalChecked(), Nan::New<v8::Boolean>(contextSetting._versionEnabled));
     return retval;
 }

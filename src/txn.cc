@@ -31,7 +31,7 @@ NAN_MODULE_INIT(Txn::Init)
     Nan::SetPrototypeMethod(constructTemplate, "dropProperty", Txn::dropProperty);
     Nan::SetPrototypeMethod(constructTemplate, "addIndex", Txn::addIndex);
     Nan::SetPrototypeMethod(constructTemplate, "dropIndex", Txn::dropIndex);
-    Nan::SetPrototypeMethod(constructTemplate, "getDbInfo", Txn::getDbInfo);
+    Nan::SetPrototypeMethod(constructTemplate, "getDBInfo", Txn::getDBInfo);
     Nan::SetPrototypeMethod(constructTemplate, "getClasses", Txn::getClasses);
     Nan::SetPrototypeMethod(constructTemplate, "getPropertiesByClassName", Txn::getPropertiesByClassName);
     Nan::SetPrototypeMethod(constructTemplate, "getPropertiesByClassDescriptor", Txn::getPropertiesByClassDescriptor);
@@ -330,10 +330,10 @@ NAN_METHOD(Txn::dropIndex) {
     } 
 }
 
-NAN_METHOD(Txn::getDbInfo) {
+NAN_METHOD(Txn::getDBInfo) {
     Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
     try {
-        nogdb::DbInfo dbInfo = txn->base->getDbInfo();
+        nogdb::DBInfo dbInfo = txn->base->getDBInfo();
         info.GetReturnValue().Set(v8DBInfo(dbInfo));
     } catch ( nogdb::Error& err ) {
         Nan::ThrowError(err.what());

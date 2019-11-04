@@ -2,6 +2,7 @@
 #include <sys/file.h>
 #include <sys/stat.h>
 #include <nogdb/nogdb.h>
+#include <iostream>
 
 class Context : public Nan::ObjectWrap {
 public:
@@ -24,15 +25,15 @@ private:
         }
     } ;
 
-    explicit Context(const std::string &path, const nogdb::ContextSetting &contextSetting) {
+    Context(const std::string &path, unsigned int maxDB, unsigned int maxDBSize, bool enableVersion) {
         struct stat fileStat;
         if (stat((char*)path.c_str(), &fileStat) == 0) {
             base = nogdb::Context(path);
         } else {
             nogdb::ContextInitializer ctxi = nogdb::ContextInitializer(path);
-            if (contextSetting._maxDb > 0) ctxi.setMaxDb(contextSetting._maxDb);
-            if (contextSetting._maxDbSize > 0) ctxi.setMaxDbSize(contextSetting._maxDbSize);
-            if (contextSetting._versionEnabled) ctxi.enableVersion();
+            if (maxDB > 0) ctxi.setMaxDB(maxDB);
+            if (maxDBSize > 0) ctxi.setMaxDBSize(maxDBSize);
+            if (enableVersion) ctxi.enableVersion();
             base = ctxi.init();
         }
     } ;
