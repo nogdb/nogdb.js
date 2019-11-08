@@ -5,6 +5,7 @@
 #include "context.hpp"
 #include "txn.hpp"
 #include "record.hpp"
+#include "condition.hpp"
 #include "toV8type.hpp"
 
 Nan::Persistent<v8::FunctionTemplate> Txn::constructor;
@@ -48,6 +49,7 @@ NAN_MODULE_INIT(Txn::Init)
     Nan::SetPrototypeMethod(constructTemplate, "remove", Txn::remove);
     Nan::SetPrototypeMethod(constructTemplate, "removeAll", Txn::removeAll);
     Nan::SetPrototypeMethod(constructTemplate, "find", Txn::find);
+    Nan::SetPrototypeMethod(constructTemplate, "count", Txn::count);
     Nan::SetPrototypeMethod(constructTemplate, "findSubClassOf", Txn::findSubClassOf);
     Nan::SetPrototypeMethod(constructTemplate, "findInEdge", Txn::findInEdge);
     Nan::SetPrototypeMethod(constructTemplate, "findOutEdge", Txn::findOutEdge);
@@ -715,8 +717,97 @@ NAN_METHOD(Txn::removeAll) {
 }
 
 NAN_METHOD(Txn::find) {
-    //TODO
-    info.GetReturnValue().SetUndefined();
+    v8::Local<v8::FunctionTemplate> conditionType = Nan::New<v8::FunctionTemplate>(Condition::constructor);
+    if(info.Length() == 1 && info[0]->IsString()){
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+        std::string className = *Nan::Utf8String(info[0]->ToString());
+        try {
+            nogdb::ResultSet resultSet = txn->base->find(className).get();
+            info.GetReturnValue().Set(v8ResultSet(resultSet));
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        } 
+    } else if(info.Length() == 2 && info[0]->IsString() && conditionType->HasInstance(info[1]->ToObject())) {
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+        std::string className = *Nan::Utf8String(info[0]->ToString());
+        Condition *cond = Nan::ObjectWrap::Unwrap<Condition>(info[1]->ToObject());
+        try {
+            nogdb::ResultSet resultSet = txn->base->find(className).where(cond->base).get();
+            info.GetReturnValue().Set(v8ResultSet(resultSet));
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        } 
+    } else if(info.Length() == 2 && info[0]->IsString() && info[1]->IsObject()) {
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+        std::string className = *Nan::Utf8String(info[0]->ToString());
+        bool indexed = Nan::Get(info[1]->ToObject(), Nan::New<v8::String>("indexed").ToLocalChecked()).ToLocalChecked()->BooleanValue();
+        try {
+            nogdb::ResultSet resultSet = (indexed)? txn->base->find(className).indexed().get(): txn->base->find(className).get();
+            info.GetReturnValue().Set(v8ResultSet(resultSet));
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        } 
+    } else if(info.Length() == 3 && info[0]->IsString() && conditionType->HasInstance(info[1]->ToObject()) && info[2]->IsObject()) {
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+        std::string className = *Nan::Utf8String(info[0]->ToString());
+        Condition *cond = Nan::ObjectWrap::Unwrap<Condition>(info[1]->ToObject());
+        bool indexed = Nan::Get(info[2]->ToObject(), Nan::New<v8::String>("indexed").ToLocalChecked()).ToLocalChecked()->BooleanValue();
+        try {
+            nogdb::ResultSet resultSet = (indexed)? txn->base->find(className).where(cond->base).indexed().get(): txn->base->find(className).where(cond->base).get();
+            info.GetReturnValue().Set(v8ResultSet(resultSet));
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        }
+    } else {
+         return Nan::ThrowError(Nan::New("Txn.find() - invalid arugment(s)").ToLocalChecked());
+    }
+}
+
+NAN_METHOD(Txn::count) {
+    v8::Local<v8::FunctionTemplate> conditionType = Nan::New<v8::FunctionTemplate>(Condition::constructor);
+    if(info.Length() == 1 && info[0]->IsString()){
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+        std::string className = *Nan::Utf8String(info[0]->ToString());
+        try {
+            unsigned int count = txn->base->find(className).count();
+            info.GetReturnValue().Set(count);
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        } 
+    } else if(info.Length() == 2 && info[0]->IsString() && conditionType->HasInstance(info[1]->ToObject())) {
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+        std::string className = *Nan::Utf8String(info[0]->ToString());
+        Condition *cond = Nan::ObjectWrap::Unwrap<Condition>(info[1]->ToObject());
+        try {
+            unsigned int count = txn->base->find(className).where(cond->base).count();
+            info.GetReturnValue().Set(count);
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        } 
+    } else if(info.Length() == 2 && info[0]->IsString() && info[1]->IsObject()) {
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+        std::string className = *Nan::Utf8String(info[0]->ToString());
+        bool indexed = Nan::Get(info[1]->ToObject(), Nan::New<v8::String>("indexed").ToLocalChecked()).ToLocalChecked()->BooleanValue();
+        try {
+            unsigned int count = (indexed)? txn->base->find(className).indexed().count(): txn->base->find(className).count();
+            info.GetReturnValue().Set(count);
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        } 
+    } else if(info.Length() == 3 && info[0]->IsString() && conditionType->HasInstance(info[1]->ToObject()) && info[2]->IsObject()) {
+        Txn *txn = Nan::ObjectWrap::Unwrap<Txn>(info.This());
+        std::string className = *Nan::Utf8String(info[0]->ToString());
+        Condition *cond = Nan::ObjectWrap::Unwrap<Condition>(info[1]->ToObject());
+        bool indexed = Nan::Get(info[2]->ToObject(), Nan::New<v8::String>("indexed").ToLocalChecked()).ToLocalChecked()->BooleanValue();
+        try {
+            unsigned int count = (indexed)? txn->base->find(className).where(cond->base).indexed().count(): txn->base->find(className).where(cond->base).count();
+            info.GetReturnValue().Set(count);
+        } catch ( nogdb::Error& err ) {
+            Nan::ThrowError(err.what());
+        }
+    } else {
+         return Nan::ThrowError(Nan::New("Txn.find() - invalid arugment(s)").ToLocalChecked());
+    }
 }
 
 NAN_METHOD(Txn::findSubClassOf) {
@@ -784,4 +875,18 @@ v8::Local<v8::Object> Txn::NewInstance(v8::Local<v8::Value> ctx,v8::Local<v8::Va
     v8::Local<v8::Object> instance = Nan::NewInstance(cons,argc, argv).ToLocalChecked();
 
     return scope.Escape(instance);
+}
+
+bool Txn::equals(const std::string& a, const std::string& b)
+{
+    unsigned int lenA = a.size();
+    if (b.size() != lenA) {
+        return false;
+    }
+    for (auto i = 0U; i < lenA; ++i) {
+        if (std::tolower(a[i]) != std::tolower(b[i])) {
+            return false;
+        }
+    }
+    return true;
 }

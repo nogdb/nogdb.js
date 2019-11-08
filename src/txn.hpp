@@ -50,6 +50,7 @@ private:
     static NAN_METHOD(remove);
     static NAN_METHOD(removeAll);
     static NAN_METHOD(find);
+    static NAN_METHOD(count);
     static NAN_METHOD(findSubClassOf);
     static NAN_METHOD(findInEdge);
     static NAN_METHOD(findOutEdge);
@@ -61,5 +62,7 @@ private:
     static NAN_METHOD(traverseOut);
     static NAN_METHOD(traverse);
     static NAN_METHOD(shortestPath);
+
+    static bool equals(const std::string& a, const std::string& b);
 
 };

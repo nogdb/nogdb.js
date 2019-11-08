@@ -61,7 +61,7 @@ NAN_METHOD(Condition::eq) {
         std::string value = *Nan::Utf8String(info[0]->ToString());
         try {
             cond->base = cond->base.eq(value);
-            info.GetReturnValue().SetUndefined();    
+            info.GetReturnValue().Set(info.Holder());   
         } catch ( nogdb::Error& err ) {
             Nan::ThrowError(err.what());
         }
@@ -71,7 +71,7 @@ NAN_METHOD(Condition::eq) {
         double value = info[0]->NumberValue();
         try {
             cond->base = cond->base.eq(value);
-            info.GetReturnValue().SetUndefined();    
+            info.GetReturnValue().Set(info.Holder());    
         } catch ( nogdb::Error& err ) {
             Nan::ThrowError(err.what());
         }
@@ -89,7 +89,7 @@ NAN_METHOD(Condition::gt) {
         std::string value = *Nan::Utf8String(info[0]->ToString());
         try {
             cond->base = cond->base.gt(value);
-            info.GetReturnValue().SetUndefined();    
+            info.GetReturnValue().Set(info.Holder());    
         } catch ( nogdb::Error& err ) {
             Nan::ThrowError(err.what());
         }
@@ -99,7 +99,7 @@ NAN_METHOD(Condition::gt) {
         double value = info[0]->NumberValue();
         try {
             cond->base = cond->base.gt(value);
-            info.GetReturnValue().SetUndefined();    
+            info.GetReturnValue().Set(info.Holder());   
         } catch ( nogdb::Error& err ) {
             Nan::ThrowError(err.what());
         }
@@ -117,7 +117,7 @@ NAN_METHOD(Condition::lt) {
         std::string value = *Nan::Utf8String(info[0]->ToString());
         try {
             cond->base = cond->base.lt(value);
-            info.GetReturnValue().SetUndefined();    
+            info.GetReturnValue().Set(info.Holder());    
         } catch ( nogdb::Error& err ) {
             Nan::ThrowError(err.what());
         }  
@@ -127,7 +127,7 @@ NAN_METHOD(Condition::lt) {
         double value = info[0]->NumberValue();
         try {
             cond->base = cond->base.lt(value);
-            info.GetReturnValue().SetUndefined();    
+            info.GetReturnValue().Set(info.Holder());   
         } catch ( nogdb::Error& err ) {
             Nan::ThrowError(err.what());
         } 
@@ -145,7 +145,7 @@ NAN_METHOD(Condition::ge) {
         std::string value = *Nan::Utf8String(info[0]->ToString());
         try {
             cond->base = cond->base.ge(value);
-            info.GetReturnValue().SetUndefined();    
+            info.GetReturnValue().Set(info.Holder());  
         } catch ( nogdb::Error& err ) {
             Nan::ThrowError(err.what());
         }
@@ -155,7 +155,7 @@ NAN_METHOD(Condition::ge) {
         double value = info[0]->NumberValue();
         try {
             cond->base = cond->base.ge(value);
-            info.GetReturnValue().SetUndefined();    
+            info.GetReturnValue().Set(info.Holder());    
         } catch ( nogdb::Error& err ) {
             Nan::ThrowError(err.what());
         }
@@ -173,7 +173,7 @@ NAN_METHOD(Condition::le) {
         std::string value = *Nan::Utf8String(info[0]->ToString());
         try {
             cond->base = cond->base.le(value);
-            info.GetReturnValue().SetUndefined();    
+            info.GetReturnValue().Set(info.Holder());    
         } catch ( nogdb::Error& err ) {
             Nan::ThrowError(err.what());
         }
@@ -183,7 +183,7 @@ NAN_METHOD(Condition::le) {
         double value = info[0]->NumberValue();
         try {
             cond->base = cond->base.le(value);
-            info.GetReturnValue().SetUndefined();    
+            info.GetReturnValue().Set(info.Holder());    
         } catch ( nogdb::Error& err ) {
             Nan::ThrowError(err.what());
         }
@@ -201,7 +201,7 @@ NAN_METHOD(Condition::contain) {
         std::string value = *Nan::Utf8String(info[0]->ToString());
         try {
             cond->base = cond->base.contain(value);
-            info.GetReturnValue().SetUndefined();    
+            info.GetReturnValue().Set(info.Holder());    
         } catch ( nogdb::Error& err ) {
             Nan::ThrowError(err.what());
         }
@@ -219,7 +219,7 @@ NAN_METHOD(Condition::beginWith) {
         std::string value = *Nan::Utf8String(info[0]->ToString());
         try {
             cond->base = cond->base.beginWith(value);
-            info.GetReturnValue().SetUndefined();    
+            info.GetReturnValue().Set(info.Holder());    
         } catch ( nogdb::Error& err ) {
             Nan::ThrowError(err.what());
         }
@@ -237,7 +237,7 @@ NAN_METHOD(Condition::endWith) {
         std::string value = *Nan::Utf8String(info[0]->ToString());
         try {
             cond->base = cond->base.endWith(value);
-            info.GetReturnValue().SetUndefined();    
+            info.GetReturnValue().Set(info.Holder());    
         } catch ( nogdb::Error& err ) {
             Nan::ThrowError(err.what());
         }
@@ -255,7 +255,7 @@ NAN_METHOD(Condition::like) {
         std::string value = *Nan::Utf8String(info[0]->ToString());
         try {
             cond->base = cond->base.like(value);
-            info.GetReturnValue().SetUndefined();    
+            info.GetReturnValue().Set(info.Holder());    
         } catch ( nogdb::Error& err ) {
             Nan::ThrowError(err.what());
         }     
@@ -273,7 +273,7 @@ NAN_METHOD(Condition::regex) {
         std::string value = *Nan::Utf8String(info[0]->ToString());
         try {
             cond->base = cond->base.regex(value);
-            info.GetReturnValue().SetUndefined();    
+            info.GetReturnValue().Set(info.Holder());    
         } catch ( nogdb::Error& err ) {
             Nan::ThrowError(err.what());
         } 
@@ -288,7 +288,7 @@ NAN_METHOD(Condition::ignoreCase) {
     Condition *cond = Nan::ObjectWrap::Unwrap<Condition>(info.This());
     try {
         cond->base = cond->base.ignoreCase();
-        info.GetReturnValue().SetUndefined();        
+        info.GetReturnValue().Set(info.Holder());        
     } catch ( nogdb::Error& err ) {
         Nan::ThrowError(err.what());
     }
@@ -315,7 +315,7 @@ NAN_METHOD(Condition::in) {
             }
             try {
                 cond->base = cond->base.in(propValues);
-                info.GetReturnValue().SetUndefined();        
+                info.GetReturnValue().Set(info.Holder());        
             } catch ( nogdb::Error& err ) {
                 Nan::ThrowError(err.what());
             }
@@ -335,7 +335,7 @@ NAN_METHOD(Condition::in) {
             }
             try {
                 cond->base = cond->base.in(propValues);
-                info.GetReturnValue().SetUndefined();        
+                info.GetReturnValue().Set(info.Holder());        
             } catch ( nogdb::Error& err ) {
                 Nan::ThrowError(err.what());
             }
@@ -360,7 +360,7 @@ NAN_METHOD(Condition::between) {
         std::string upper = *Nan::Utf8String(info[1]->ToString());
         try {
             cond->base = cond->base.between(lower,upper);
-            info.GetReturnValue().SetUndefined();    
+            info.GetReturnValue().Set(info.Holder());    
         } catch ( nogdb::Error& err ) {
             Nan::ThrowError(err.what());
         } 
@@ -371,7 +371,7 @@ NAN_METHOD(Condition::between) {
         double upper = info[1]->NumberValue();
         try {
             cond->base = cond->base.between(lower,upper);
-            info.GetReturnValue().SetUndefined();    
+            info.GetReturnValue().Set(info.Holder());    
         } catch ( nogdb::Error& err ) {
             Nan::ThrowError(err.what());
         } 
@@ -383,7 +383,7 @@ NAN_METHOD(Condition::between) {
         std::pair<bool, bool> isIncludeBound = {info[2]->BooleanValue(),info[3]->BooleanValue()};
         try {
             cond->base = cond->base.between(lower,upper,isIncludeBound);
-            info.GetReturnValue().SetUndefined();    
+            info.GetReturnValue().Set(info.Holder());    
         } catch ( nogdb::Error& err ) {
             Nan::ThrowError(err.what());
         } 
@@ -395,7 +395,7 @@ NAN_METHOD(Condition::between) {
         std::pair<bool, bool> isIncludeBound = {info[2]->BooleanValue(),info[3]->BooleanValue()};
         try {
             cond->base = cond->base.between(lower,upper,isIncludeBound);
-            info.GetReturnValue().SetUndefined();    
+            info.GetReturnValue().Set(info.Holder());    
         } catch ( nogdb::Error& err ) {
             Nan::ThrowError(err.what());
         } 
@@ -410,7 +410,7 @@ NAN_METHOD(Condition::null) {
     Condition *cond = Nan::ObjectWrap::Unwrap<Condition>(info.This());
     try {
         cond->base = cond->base.null();
-        info.GetReturnValue().SetUndefined();        
+        info.GetReturnValue().Set(info.Holder());        
     } catch ( nogdb::Error& err ) {
         Nan::ThrowError(err.what());
     }
